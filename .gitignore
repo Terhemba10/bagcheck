@@ -19,3 +19,7 @@ test-results/
 .DS_Store
 Thumbs.db
 *.log
+
+# generated
+*.tsbuildinfo
+next-env.d.ts
