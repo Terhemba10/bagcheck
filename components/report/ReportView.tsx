@@ -15,6 +15,8 @@ import type { Report } from "@/lib/core/report";
 import { money, pct } from "@/lib/core/format";
 import { cn } from "@/lib/cn";
 import { ContractDetails, LinksList, PoolsTable } from "./ReportDetails";
+import { PromiseTimeline } from "./PromiseTimeline";
+import { setBagContext } from "@/lib/client/bagContext";
 
 const SCAN_STEPS = ["Checking supply…", "Reading the official links…", "Scanning the contract…", "Measuring DEX liquidity…", "Comparing with the market…"];
 
@@ -48,6 +50,20 @@ export function ReportView({ id }: { id: number }) {
     loadReport(id, ctrl.signal).then((next) => next && setLoad(next));
     return () => ctrl.abort();
   }, [id]);
+
+  // tell the corner Bag which coin is on screen (cleared when leaving the page)
+  const report = load.s === "ok" ? load.report : null;
+  useEffect(() => {
+    if (!report) return;
+    setBagContext({
+      coinId: report.coin.id,
+      name: report.coin.name,
+      symbol: report.coin.symbol,
+      state: report.score.concern ? AGENT_FOR[report.score.concern]! : "idle",
+      verdict: report.verdict,
+    });
+    return () => setBagContext(null);
+  }, [report]);
 
   const retry = () => {
     setLoad({ s: "loading" });
@@ -121,6 +137,9 @@ export function ReportView({ id }: { id: number }) {
             </ul>
           )}
         </section>
+
+        {/* starts loading together with the report (separate AI call, cached 24 h) */}
+        <PromiseTimeline id={id} />
 
         {r && (
           <>

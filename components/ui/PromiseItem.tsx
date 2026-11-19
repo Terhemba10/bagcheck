@@ -6,7 +6,8 @@ export type PromiseStatus = "upcoming" | "due-soon" | "overdue" | "delivered" | 
 const STATUS = {
   upcoming: { label: "Upcoming", Icon: IconClock, cls: "text-muted", dot: "bg-muted" },
   "due-soon": { label: "Due soon", Icon: IconWatch, cls: "text-teal", dot: "bg-teal" },
-  overdue: { label: "Overdue, no sign of delivery", Icon: IconTriangle, cls: "text-warn", dot: "bg-warn" },
+  // We only know the date has passed, not whether it was delivered: say exactly that.
+  overdue: { label: "Date passed: delivered?", Icon: IconTriangle, cls: "text-warn", dot: "bg-warn" },
   delivered: { label: "Marked delivered", Icon: IconCheck, cls: "text-ok", dot: "bg-ok" },
   "no-date": { label: "No date given", Icon: IconQuestion, cls: "text-faint", dot: "bg-faint" },
 } as const;

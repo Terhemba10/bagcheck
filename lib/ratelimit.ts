@@ -30,6 +30,15 @@ export const LIMITS = {
     { name: "report-min", max: 8, windowSec: 60 },
     { name: "report-day", max: 80, windowSec: 86_400 },
   ],
+  // AI calls: the Gemini free tier allows few requests per minute; results are cached 24 h per coin
+  promises: [
+    { name: "promises-min", max: 3, windowSec: 60 },
+    { name: "promises-day", max: 30, windowSec: 86_400 },
+  ],
+  chat: [
+    { name: "chat-min", max: 6, windowSec: 60 },
+    { name: "chat-day", max: 60, windowSec: 86_400 },
+  ],
 } satisfies Record<string, Limit[]>;
 
 export function clientIp(req: Request): string {

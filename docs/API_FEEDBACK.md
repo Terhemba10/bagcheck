@@ -23,6 +23,8 @@ Notes on what the CoinMarketCap API made possible and where it got in the way. T
 - **DEX security taxes have no documented unit.** `extra.buyTax` / `extra.sellTax` arrive as strings ("0"), with no note saying whether "0.05" means 5% or 0.05%. Bagcheck reads values below 1 as fractions and 1 or more as percentages, and shows the computed % next to the raw scan.
 - **DEX platform names aren't listed.** `platform=ethereum` and `platform=solana` work for `/v1/dex/token/pools` and `/v1/dex/security/detail` (verified 19 Nov). Other chains are mapped from the `/v2/cryptocurrency/info` platform name but are unverified.
 
+- `/v2/cryptocurrency/info` `urls.website` / `technical_doc` give Bagcheck the project's own pages to read for the Promise check, so the roadmap comes from the source, not a third party.
+
 ## Where it got in the way
 - **Docs (19 Nov 2026):** the pricing page has an endpoint matrix, but it doesn't clearly say which tier each endpoint is in. Tier info sits on each endpoint's reference page instead, and some DEX endpoints (`/v1/dex/search`, `/v1/dex/liquidity-change/list`) don't show a tier at all.
 - **Version drift:** quotes are now documented at `/v3/cryptocurrency/quotes/latest`. Older guides, and our brief, use `/v2`. The v3 status object uses string error codes (`"0"`, `""`), while v1/v2 use numbers (`0`, `null`), so our classifier has to handle both.
