@@ -15,6 +15,7 @@ import type { Report } from "@/lib/core/report";
 import { money, pct } from "@/lib/core/format";
 import { cn } from "@/lib/cn";
 import { ContractDetails, LinksList, PoolsTable } from "./ReportDetails";
+import { WatchButton } from "@/components/watch/WatchButton";
 import { PromiseTimeline } from "./PromiseTimeline";
 import { setBagContext } from "@/lib/client/bagContext";
 
@@ -102,12 +103,7 @@ export function ReportView({ id }: { id: number }) {
             <p className="text-sm text-muted">Bag is reading live CoinMarketCap data…</p>
           )}
         </div>
-        <div className="space-y-2">
-          <Button variant="secondary" size="lg" className="w-full" disabled aria-describedby="watch-soon">
-            <IconBell className="size-5" /> Watch this coin
-          </Button>
-          <p id="watch-soon" className="text-center text-xs text-faint">Watchlist alerts are coming soon.</p>
-        </div>
+        {r ? <WatchButton coinId={r.coin.id} name={r.coin.name} /> : null}
         <Disclaimer />
       </aside>
 

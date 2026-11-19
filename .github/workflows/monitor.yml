@@ -1,0 +1,33 @@
+name: Watchlist monitor
+
+# Calls the protected monitor endpoint every hour. The app's credit governor
+# decides whether a run is actually due (on the free Basic plan: every 12 h),
+# so this costs nothing when there's nothing to do.
+on:
+  schedule:
+    - cron: "17 * * * *" # hourly, off the top of the hour (GitHub schedules can start a few minutes late)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run even if not due (still respects the credit limits)"
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Call /api/cron/check
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          FORCE: ${{ inputs.force && '1' || '0' }}
+        run: |
+          set -euo pipefail
+          status=$(curl -sS -o response.json -w "%{http_code}" --max-time 120 \
+            -X POST "https://bagcheck-azure.vercel.app/api/cron/check?force=${FORCE}" \
+            -H "Authorization: Bearer ${CRON_SECRET}")
+          cat response.json; echo
+          test "$status" = "200"

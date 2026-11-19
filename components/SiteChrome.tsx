@@ -9,9 +9,9 @@ import { DISCLAIMER } from "@/components/ui/Notice";
  */
 const ALL_NAV = [
   { href: "/", label: "Check a coin", ready: true },
-  { href: "/watchlist", label: "Watchlist", ready: false },
+  { href: "/watchlist", label: "Watchlist", ready: true },
   { href: "/rescue", label: "Rescue", ready: false },
-  { href: "/connect", label: "Connect", ready: false },
+  { href: "/connect", label: "Connect", ready: true },
   { href: "/evidence", label: "API evidence", ready: true },
 ];
 const NAV = ALL_NAV.filter((n) => n.ready);

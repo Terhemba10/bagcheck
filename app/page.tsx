@@ -18,9 +18,8 @@ const STAGES = [
     Icon: IconBell,
     title: "While you hold",
     body: "Bag re-checks your coins and warns you on Telegram when promises slip or warning signs appear.",
-    cta: "Coming soon",
+    cta: "Open watchlist",
     href: "/watchlist",
-    soon: true,
     tone: "text-warn",
   },
   {

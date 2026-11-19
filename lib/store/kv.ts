@@ -14,6 +14,10 @@ export interface KV {
   list<T>(key: string, count: number): Promise<T[]>;
   /** Atomically add 1 and return the new value; the TTL is set when the key is created. */
   incr(key: string, ttlSeconds: number): Promise<number>;
+  /** Set operations (string members). */
+  sadd(key: string, member: string): Promise<void>;
+  srem(key: string, member: string): Promise<void>;
+  smembers(key: string): Promise<string[]>;
 }
 
 class MemoryKV implements KV {
@@ -54,6 +58,19 @@ class MemoryKV implements KV {
     hit.value = (hit.value as number) + 1;
     return hit.value as number;
   }
+  async sadd(key: string, member: string) {
+    const cur = new Set((await this.get<string[]>(key)) ?? []);
+    cur.add(member);
+    await this.set(key, [...cur]);
+  }
+  async srem(key: string, member: string) {
+    const cur = new Set((await this.get<string[]>(key)) ?? []);
+    cur.delete(member);
+    await this.set(key, [...cur]);
+  }
+  async smembers(key: string) {
+    return ((await this.get<string[]>(key)) ?? []).sort();
+  }
 }
 
 class UpstashKV implements KV {
@@ -78,6 +95,15 @@ class UpstashKV implements KV {
     const n = await this.redis.incr(key);
     if (n === 1) await this.redis.expire(key, ttlSeconds);
     return n;
+  }
+  async sadd(key: string, member: string) {
+    await this.redis.sadd(key, member);
+  }
+  async srem(key: string, member: string) {
+    await this.redis.srem(key, member);
+  }
+  async smembers(key: string) {
+    return ((await this.redis.smembers(key)) ?? []).map(String).sort();
   }
 }
 

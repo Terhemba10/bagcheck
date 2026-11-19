@@ -18,8 +18,19 @@
 - **Promise check:** `lib/promises/*` + `prompts/extractPromises.ts` + `/api/promises/[id]` (rate-limited, cached 24 h). Reads the official site, roadmap/whitepaper links (or `/roadmap`), focusing long pages on the roadmap section. AI extracts items; **code keeps only quotes found word-for-word on the cited page**, normalises dates, computes status, and only marks "delivered" when the quote itself says so. Timeline on the report.
 - **Ask Bag (corner chat):** `components/agent/CornerAgent.tsx`, `lib/client/bagContext.ts`, `/api/chat`, `lib/chat/facts.ts`, `prompts/askBag.ts`. Answers only from the report facts; **code rejects answers with advice or numbers not in the facts** and falls back to report text. Seed phrases / private keys are blocked in the browser (never sent) and on the server (`lib/safety/secrets.ts`, BIP-39 list from `@scure/bip39`).
 
+- **Phase d (watchlist + scheduler + Telegram):**
+  - Anonymous web identity (`bc_uid` httpOnly cookie, `lib/uid.ts`); Telegram identity = chat id; one-time link codes (`/api/telegram/link` → `t.me/BagcheckAlertsBot?start=<code>`).
+  - Store: `lib/monitor/store.ts` (watchlists max 10, snapshots, alerts, cooldowns, delivered marks, links).
+  - Rules: `lib/monitor/rules.ts` (promise date passed, volume falling, pairs dropping, liquidity draining, supply jump, website down, underperforming vs BTC), unit-tested.
+  - Run: `lib/monitor/run.ts`: one batched quotes call + rotating deep checks (DEX liquidity, website, cached promise check) → snapshots → rules → Telegram. Governor decides if a run is due (Basic: every 12 h, max 10 coins, 1 deep check/run).
+  - Scheduler: GitHub Actions hourly (`.github/workflows/monitor.yml`, secret `CRON_SECRET`) + Vercel Cron daily backup (`vercel.json`) → `/api/cron/check` (Bearer `CRON_SECRET`).
+  - Bot @BagcheckAlertsBot: `/api/telegram/webhook` (header secret `TELEGRAM_WEBHOOK_SECRET`): /start [code], /check, /watch, /unwatch, /list, /rescue, /stop, /help; deletes messages containing seed phrases/keys.
+  - Web: Watch button on reports, `/watchlist`, `/alerts/[id]` (before/after chart, meaning, next steps, mark delivered), `/connect`.
+  - `/api/admin/test-alert?coinId=` (Bearer CRON_SECRET) sends a clearly labelled [Test] alert for demos.
+
 ## Next (in order)
-1. Phases d–h per `docs/PLAN.md`: watchlist + snapshots + credit-aware cron + Telegram alerts (use the stored promise checks for "date passed" alerts), rescue plan, MCP server, tests/CI/docs, video + submission.
+1. Phase e: rescue plan (`/rescue/[id]`: can I still sell, protect wallet, evidence pack, scam shield, lessons).
+2. Phases f–h per `docs/PLAN.md`: MCP server, tests/CI/docs, video + submission. Before 9 Dec: demo snapshots (PLAN §1b).
 
 ## Known polish items
 - Amber (concern) state: the bloomed core lowers the face's contrast on High quality.
