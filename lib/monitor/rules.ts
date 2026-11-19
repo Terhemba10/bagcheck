@@ -79,7 +79,8 @@ export function pairsDropping(h: Snapshot[], now: Date): AlertCandidate | null {
 }
 
 export function liquidityDraining(h: Snapshot[]): AlertCandidate | null {
-  const deep = h.filter((s) => s.deep && typeof s.dexLiquidityUsd === "number");
+  // only compare like with like: major-asset pools only (older snapshots counted every pool)
+  const deep = h.filter((s) => s.deep && s.liqMethod === "major" && typeof s.dexLiquidityUsd === "number");
   if (deep.length < 2) return null;
   const cur = deep[0]!.dexLiquidityUsd as number;
   const prev = deep[1]!.dexLiquidityUsd as number;

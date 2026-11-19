@@ -34,7 +34,7 @@ describe("lessons for next time", () => {
   it("uses only measured values and real alert dates when history exists", () => {
     const alerts = [{ at: "2026-11-15T08:00:00Z", title: "Trading volume fell 3 checks in a row", severity: "concern" } as Alert];
     const l = lessonsFrom({
-      snapshots: [snap("2026-11-20T10:00:00Z", { price: 0.5, volume24h: 4e5, deep: true, dexLiquidityUsd: 2e5 }), snap("2026-11-10T10:00:00Z", { deep: true, dexLiquidityUsd: 1e6 })],
+      snapshots: [snap("2026-11-20T10:00:00Z", { price: 0.5, volume24h: 4e5, deep: true, liqMethod: "major", dexLiquidityUsd: 2e5 }), snap("2026-11-10T10:00:00Z", { deep: true, liqMethod: "major", dexLiquidityUsd: 1e6 })],
       alerts,
       report,
     });
@@ -52,21 +52,24 @@ describe("lessons for next time", () => {
 
 describe("pool sides", () => {
   const C = "0xabc0000000000000000000000000000000000001";
-  it("uses the USD value on our token's side of each pool", () => {
-    const sides = poolSides(
+  it("uses our token's side, counts only major-asset pools, and lists the rest separately", () => {
+    const { counted, other } = poolSides(
       [
         { exn: "Uniswap v2", liqUsd: "200000", t0: { addr: C.toUpperCase(), sym: "TST", liqUsd: "120000" }, t1: { addr: "0xweth", sym: "WETH", liqUsd: "80000" } },
         { exn: "Uniswap v3", liqUsd: "10000", t0: { addr: "0xusdc", sym: "USDC", liqUsd: "6000" }, t1: { addr: C, sym: "TST", liqUsd: "4000" } },
-        { exn: "Dust", liqUsd: "600", t0: { addr: C, sym: "TST", liqUsd: "300" }, t1: { sym: "X" } },
+        { exn: "Uniswap v2", liqUsd: "60000", t0: { addr: "0xjunk", sym: "TST0.5", liqUsd: "30000" }, t1: { addr: C, sym: "TST", liqUsd: "30000" } },
+        { exn: "Dust", liqUsd: "600", t0: { addr: C, sym: "TST", liqUsd: "300" }, t1: { sym: "WETH" } },
       ],
       C,
+      "TST",
     );
-    expect(sides.map((s) => [s.dex, s.tokenSideUsd])).toEqual([
+    expect(counted.map((s) => [s.dex, s.tokenSideUsd])).toEqual([
       ["Uniswap v2", 120000],
       ["Uniswap v3", 4000],
-    ]); // dust pool dropped
+    ]);
+    expect(other.map((s) => s.pair)).toEqual(["TST0.5/TST"]); // shown collapsed, not counted; dust dropped
   });
-  it("falls back to half the pool when the side can't be identified", () => {
-    expect(poolSides([{ exn: "DEX", liqUsd: "10000", t0: { sym: "A" }, t1: { sym: "B" } }], C)[0]!.tokenSideUsd).toBe(5000);
+  it("matches our side by symbol when addresses are missing", () => {
+    expect(poolSides([{ exn: "DEX", liqUsd: "10000", t0: { sym: "TST", liqUsd: "5000" }, t1: { sym: "USDT", liqUsd: "5000" } }], C, "TST").counted[0]!.tokenSideUsd).toBe(5000);
   });
 });

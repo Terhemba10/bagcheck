@@ -5,6 +5,7 @@ import { decideMode, isRunDue, type GovernorDecision } from "@/lib/cmc/budget";
 import { checkLink } from "@/lib/core/links";
 import { dexPlatformName } from "@/lib/core/report";
 import { num, type DexPool } from "@/lib/core/signals";
+import { countsAsLiquidity } from "@/lib/core/pools";
 import { runPromiseCheck } from "@/lib/promises/check";
 import { kv } from "@/lib/store/kv";
 import { formatAlert, sendMessage, telegramConfigured } from "@/lib/telegram/api";
@@ -133,7 +134,7 @@ export async function runMonitor(opts: { force?: boolean; now?: Date } = {}): Pr
 }
 
 /** DEX liquidity (tokens only) + website reachability. ~1 credit for tokens, 0 for native coins. */
-async function deepCheck(id: number): Promise<Pick<Snapshot, "dexLiquidityUsd" | "websiteUp">> {
+async function deepCheck(id: number): Promise<Pick<Snapshot, "dexLiquidityUsd" | "websiteUp" | "liqMethod">> {
   const info = (await getInfo([id]).catch(() => null))?.value[id];
   let dexLiquidityUsd: number | null = null;
   const contract = info?.platform?.token_address ?? info?.contract_address?.[0]?.contract_address ?? null;
@@ -141,14 +142,17 @@ async function deepCheck(id: number): Promise<Pick<Snapshot, "dexLiquidityUsd" |
   if (contract && platform) {
     try {
       const pools = (await getDexPools(platform, contract)).value as DexPool[];
-      dexLiquidityUsd = (Array.isArray(pools) ? pools : []).reduce((sum, p) => sum + (num(p.liqUsd) ?? 0), 0);
+      // same rule as the report: only pools paired with a major asset count
+      dexLiquidityUsd = (Array.isArray(pools) ? pools : [])
+        .filter((p) => countsAsLiquidity(p, { contract, symbol: info?.symbol }))
+        .reduce((sum, p) => sum + (num(p.liqUsd) ?? 0), 0);
     } catch {
       dexLiquidityUsd = null;
     }
   }
   const site = info?.urls?.website?.[0];
   const websiteUp = site ? (await checkLink("website", site)).state !== "down" : null;
-  return { dexLiquidityUsd, websiteUp };
+  return { dexLiquidityUsd, websiteUp, liqMethod: "major" };
 }
 
 /** Send to every watcher with a Telegram chat. Promise alerts respect each user's "delivered" marks. */

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { IconLock } from "@/components/ui/icons";
 import { buildEvidenceText, EMPTY_EVIDENCE, EVIDENCE_LABELS, findSecrets, type EvidenceFields } from "@/lib/rescue/evidence";
-import { SECRET_WARNING } from "@/lib/safety/secrets";
+import { SECRET_WARNING_SAVED } from "@/lib/safety/secrets";
 
 /**
  * Evidence summary, built and downloaded entirely in the browser. Nothing is
@@ -82,7 +82,7 @@ export function EvidencePack({ coin, facts }: { coin: { id: number; name: string
               {meta.multiline ? <textarea rows={k === "whatHappened" ? 4 : 2} {...common} /> : <input {...common} />}
               {isBlocked && (
                 <p id={`${fid}-err`} role="alert" className="rounded-md border border-danger/40 bg-danger-soft p-2 text-xs">
-                  🔒 {SECRET_WARNING} The field was cleared.
+                  🔒 {SECRET_WARNING_SAVED} The field was cleared.
                 </p>
               )}
             </div>

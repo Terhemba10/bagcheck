@@ -54,8 +54,11 @@ export function ContractDetails({ r }: { r: Report }) {
 /** Where the DEX liquidity sits. */
 export function PoolsTable({ r }: { r: Report }) {
   const s = r.signals.find((x) => x.id === "liquidity");
-  const pools = (s?.details as { pools?: { dex: string; pair: string; liq: number; vol: number }[] } | undefined)?.pools;
-  if (!pools?.length) return null;
+  type Row = { dex: string; pair: string; liq: number; vol: number };
+  const details = s?.details as { pools?: Row[]; otherPools?: Row[] } | undefined;
+  const pools = details?.pools ?? [];
+  const other = details?.otherPools ?? [];
+  if (!pools.length && !other.length) return null;
   return (
     <section aria-labelledby="pools-title" className="space-y-3">
       <h2 id="pools-title" className="text-xl font-semibold">Where the liquidity is</h2>
@@ -82,7 +85,25 @@ export function PoolsTable({ r }: { r: Report }) {
           </tbody>
         </table>
       </GlassCard>
-      <p className="text-xs text-faint">Exchange (CEX) order books need a paid CoinMarketCap plan and aren&apos;t included.</p>
+      {other.length > 0 && (
+        <details className="glass rounded-lg px-5 py-3 text-sm">
+          <summary className="cursor-pointer select-none text-muted">Other pools (paired with small tokens, not counted) · {other.length}</summary>
+          <ul className="mt-2 space-y-1">
+            {other.map((p, i) => (
+              <li key={i} className="tabular flex justify-between gap-3 border-t border-line pt-1 first:border-t-0">
+                <span>
+                  {p.dex} <span className="text-muted">{p.pair}</span>
+                </span>
+                <span className="text-muted">{money(p.liq)}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <p className="text-xs text-faint">
+        Only pools paired with a major asset (ETH, BTC, major stablecoins or the chain&apos;s own coin) are counted. Exchange (CEX) order books need a paid
+        CoinMarketCap plan and aren&apos;t included.
+      </p>
     </section>
   );
 }

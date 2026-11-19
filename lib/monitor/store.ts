@@ -32,6 +32,8 @@ export interface Snapshot {
   btcChange7d: number | null;
   /** Only on deep checks: */
   dexLiquidityUsd?: number | null;
+  /** How dexLiquidityUsd was measured; only "major" (major-asset pools) values are compared. */
+  liqMethod?: "major";
   websiteUp?: boolean | null;
   deep: boolean;
 }

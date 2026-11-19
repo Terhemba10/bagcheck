@@ -66,10 +66,23 @@ describe("concentration (Startup extra)", () => {
 });
 
 describe("liquidity", () => {
-  it("sums DEX pools (numbers arrive as strings) and grades the total", () => {
-    const s = liquiditySignal(ok([{ exn: "Uniswap v2", liqUsd: "120000", t0: { sym: "T" }, t1: { sym: "WETH" } }, { exn: "Uniswap v3", liqUsd: "30000" }]), quote());
+  it("sums only pools paired with a major asset (numbers arrive as strings)", () => {
+    const s = liquiditySignal(
+      ok([
+        { exn: "Uniswap v2", liqUsd: "120000", t0: { sym: "TST" }, t1: { sym: "WETH" } },
+        { exn: "Uniswap v3", liqUsd: "30000", t0: { sym: "USDC" }, t1: { sym: "TST" } },
+        { exn: "Uniswap v2", liqUsd: "90000", t0: { sym: "TST0.5" }, t1: { sym: "TST" } }, // lookalike: not counted
+      ]),
+      quote(),
+    );
     expect(s.level).toBe("concern");
     expect(s.value).toBe("$150.0K");
+    expect((s.details as { otherPools: unknown[] }).otherPools).toHaveLength(1);
+  });
+  it("is danger when every pool is paired with small tokens", () => {
+    const s = liquiditySignal(ok([{ exn: "Uniswap v2", liqUsd: "500000", t0: { sym: "ARRKY" }, t1: { sym: "TST" } }]), quote());
+    expect(s.level).toBe("danger");
+    expect(s.meaning).toMatch(/only paired with small tokens/);
   });
   it("is danger with no pools", () => {
     expect(liquiditySignal(ok([]), quote()).level).toBe("danger");

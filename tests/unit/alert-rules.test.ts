@@ -63,15 +63,19 @@ describe("pairs dropping", () => {
 });
 
 describe("liquidity draining", () => {
+  it("ignores older snapshots measured with every pool (no false alert after the method change)", () => {
+    // before: $1M counting junk pools; now: $600K counting major-asset pools only
+    expect(liquidityDraining([snap({ deep: true, liqMethod: "major", dexLiquidityUsd: 600e3 }), snap({ deep: true, dexLiquidityUsd: 1e6 }, 12)])).toBeNull();
+  });
   it("compares deep checks only", () => {
-    const h = [snap({ deep: true, dexLiquidityUsd: 400e3 }), snap({}, 6), snap({ deep: true, dexLiquidityUsd: 1e6 }, 12)];
+    const h = [snap({ deep: true, liqMethod: "major", dexLiquidityUsd: 400e3 }), snap({}, 6), snap({ deep: true, liqMethod: "major", dexLiquidityUsd: 1e6 }, 12)];
     expect(liquidityDraining(h)!.severity).toBe("danger"); // -60%
   });
   it("crossing the $50K floor is danger even if the % drop is small", () => {
-    expect(liquidityDraining([snap({ deep: true, dexLiquidityUsd: 45e3 }), snap({ deep: true, dexLiquidityUsd: 55e3 }, 12)])!.severity).toBe("danger");
+    expect(liquidityDraining([snap({ deep: true, liqMethod: "major", dexLiquidityUsd: 45e3 }), snap({ deep: true, liqMethod: "major", dexLiquidityUsd: 55e3 }, 12)])!.severity).toBe("danger");
   });
   it("stays quiet on small moves", () => {
-    expect(liquidityDraining([snap({ deep: true, dexLiquidityUsd: 900e3 }), snap({ deep: true, dexLiquidityUsd: 1e6 }, 12)])).toBeNull();
+    expect(liquidityDraining([snap({ deep: true, liqMethod: "major", dexLiquidityUsd: 900e3 }), snap({ deep: true, liqMethod: "major", dexLiquidityUsd: 1e6 }, 12)])).toBeNull();
   });
 });
 
@@ -133,8 +137,8 @@ describe("evaluateRules", () => {
   });
   it("never uses banned words in any alert", () => {
     const h = [
-      snap({ volume24h: 300e3, numPairs: 10, circulating: 2e6, change7d: -70, btcChange7d: 0, deep: true, dexLiquidityUsd: 10e3, websiteUp: false }),
-      snap({ volume24h: 500e3, numPairs: 50, circulating: 1e6, deep: true, dexLiquidityUsd: 1e6, websiteUp: false }, 12),
+      snap({ volume24h: 300e3, numPairs: 10, circulating: 2e6, change7d: -70, btcChange7d: 0, deep: true, liqMethod: "major", dexLiquidityUsd: 10e3, websiteUp: false }),
+      snap({ volume24h: 500e3, numPairs: 50, circulating: 1e6, deep: true, liqMethod: "major", dexLiquidityUsd: 1e6, websiteUp: false }, 12),
       snap({ volume24h: 700e3 }, 24),
       snap({ volume24h: 1e6 }, 36),
     ];

@@ -67,7 +67,7 @@ export function lessonsFrom(input: { snapshots: Snapshot[]; alerts: Alert[]; rep
   if (p !== null) changes.push(`Price: ${pct(p)} (${money(first.price)} → ${money(last.price)})`);
   const v = delta(first.volume24h, last.volume24h);
   if (v !== null) changes.push(`24h volume: ${pct(v)} (${money(first.volume24h)} → ${money(last.volume24h)})`);
-  const deep = snaps.filter((s) => s.deep && typeof s.dexLiquidityUsd === "number");
+  const deep = snaps.filter((s) => s.deep && s.liqMethod === "major" && typeof s.dexLiquidityUsd === "number");
   if (deep.length >= 2) {
     const l = delta(deep[0]!.dexLiquidityUsd, deep.at(-1)!.dexLiquidityUsd);
     if (l !== null) changes.push(`DEX liquidity: ${pct(l)} (${money(deep[0]!.dexLiquidityUsd)} → ${money(deep.at(-1)!.dexLiquidityUsd)})`);

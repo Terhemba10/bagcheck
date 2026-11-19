@@ -86,7 +86,7 @@ const pickOne = <T>(a: Avail<Record<number, T>>, id: number): Avail<T> => {
 };
 
 export async function buildReport(id: number, opts: { fresh?: boolean } = {}): Promise<Report> {
-  const key = `report:v2:${id}`; // bump when the report shape or copy changes
+  const key = `report:v3:${id}`; // bump when the report shape or copy changes
   if (!opts.fresh) {
     const cached = await kv().get<Report>(key).catch(() => null);
     if (cached) return { ...cached, freshness: "cache" };
@@ -123,7 +123,7 @@ export async function buildReport(id: number, opts: { fresh?: boolean } = {}): P
     dilutionSignal(quote),
     volumeSignal(quote),
     concentrationSignal(pairs),
-    liquiditySignal(pools as Avail<DexPool[]>, quote),
+    liquiditySignal(pools as Avail<DexPool[]>, quote, { contract, symbol: meta?.symbol }),
     momentumSignal(quote, btc, info),
     linksSignal(links),
     contractSignal(security),

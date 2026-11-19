@@ -10,6 +10,7 @@ import type { SourceKind } from "@/components/ui/SourceTag";
 import type { CoinInfo, CoinQuote, MarketPairs } from "@/lib/cmc/types";
 import type { LinkCheck } from "./links";
 import { ageText, daysBetween, money, pct, share } from "./format";
+import { countsAsLiquidity } from "./pools";
 
 export type Avail<T> =
   | { status: "ok"; value: T; source: SourceKind; at?: string }
@@ -49,8 +50,8 @@ export interface DexPool {
   liqUsd?: string | number;
   v24?: string | number;
   pubAt?: string | number;
-  t0?: { sym?: string };
-  t1?: { sym?: string };
+  t0?: { sym?: string; addr?: string; liqUsd?: string | number };
+  t1?: { sym?: string; addr?: string; liqUsd?: string | number };
 }
 
 export const num = (v: unknown): number | null => {
@@ -190,20 +191,37 @@ export function concentrationSignal(pairs: Avail<MarketPairs>): Signal {
 
 // ─── 4. Liquidity (DEX pools on Basic; CEX pairs when available) ──────────────
 
-export function liquiditySignal(pools: Avail<DexPool[]>, quote: Avail<CoinQuote>): Signal {
+export function liquiditySignal(pools: Avail<DexPool[]>, quote: Avail<CoinQuote>, ours: { contract?: string | null; symbol?: string | null } = {}): Signal {
   const title = "Liquidity";
   const why = "Liquidity is the money available to buy from you. If it's thin, selling even a small amount can drop the price.";
   if (pools.status === "none") {
     return unknown("liquidity", title, `${pools.reason} Exchange order-book depth needs a paid CoinMarketCap plan.`, why, { kind: "paid-plan" });
   }
   if (pools.status !== "ok") return unknown("liquidity", title, "We couldn't load DEX pool liquidity.", why, src(pools));
-  const list = pools.value
-    .map((p) => ({ dex: p.exn ?? "DEX", liq: num(p.liqUsd) ?? 0, vol: num(p.v24) ?? 0, pair: `${p.t0?.sym ?? "?"}/${p.t1?.sym ?? "?"}` }))
+  const symbol = ours.symbol ?? (quote.status === "ok" ? quote.value.symbol : null);
+  const rows = pools.value
+    .map((p) => ({ dex: p.exn ?? "DEX", liq: num(p.liqUsd) ?? 0, vol: num(p.v24) ?? 0, pair: `${p.t0?.sym ?? "?"}/${p.t1?.sym ?? "?"}`, counted: countsAsLiquidity(p, { contract: ours.contract, symbol }) }))
     .filter((p) => p.liq >= 1000) // ignore dust pools
     .sort((a, b) => b.liq - a.liq);
+  // only pools paired with a major asset (ETH, BTC, major stablecoins, chain coins) count
+  const list = rows.filter((p) => p.counted);
+  const otherPools = rows.filter((p) => !p.counted).slice(0, 8);
   const total = list.reduce((s, p) => s + p.liq, 0);
   if (!list.length) {
-    return { id: "liquidity", title, level: "danger", value: "$0", valueLabel: "in DEX pools", meaning: "We found no DEX pools with liquidity for this token.", why, source: src(pools), scored: true, details: { pools: [] } };
+    return {
+      id: "liquidity",
+      title,
+      level: "danger",
+      value: "$0",
+      valueLabel: "in pools with major assets",
+      meaning: otherPools.length
+        ? "This token's DEX pools are only paired with small tokens, not with ETH, BTC, stablecoins or the chain's own coin, so they aren't a reliable way to sell."
+        : "We found no DEX pools with liquidity for this token.",
+      why,
+      source: src(pools),
+      scored: true,
+      details: { pools: [], otherPools },
+    };
   }
   const L = RULES.liquidity;
   const level: Level = total < L.danger ? "danger" : total < L.concern ? "concern" : total < L.watch ? "watch" : "ok";
@@ -215,11 +233,11 @@ export function liquiditySignal(pools: Avail<DexPool[]>, quote: Avail<CoinQuote>
     level,
     value: money(total),
     valueLabel: `across ${list.length} DEX pool${list.length === 1 ? "" : "s"}`,
-    meaning: `${money(total)} sits in decentralised exchange pools${mcap ? ` (${share(total / mcap)} of the coin's market value)` : ""}. The deepest is ${list[0]!.dex} ${list[0]!.pair} with ${share(topShare)} of it.`,
+    meaning: `${money(total)} sits in decentralised exchange pools paired with major assets${mcap ? ` (${share(total / mcap)} of the coin's market value)` : ""}. The deepest is ${list[0]!.dex} ${list[0]!.pair} with ${share(topShare)} of it.`,
     why,
     source: src(pools),
     scored: true,
-    details: { totalUsd: total, pools: list.slice(0, 8) },
+    details: { totalUsd: total, pools: list.slice(0, 8), otherPools },
   };
 }
 

@@ -3,6 +3,7 @@ import { getDexPools, getMarketPairs, getQuotes } from "@/lib/cmc/api";
 import { CmcError } from "@/lib/cmc/errors";
 import { buildReport, dexPlatformName, type Report } from "@/lib/core/report";
 import { num } from "@/lib/core/signals";
+import { countsAsLiquidity, sidesOf } from "@/lib/core/pools";
 import { alertsForCoins, getSnapshots, type Snapshot } from "@/lib/monitor/store";
 import { lessonsFrom, type Lessons } from "./lessons";
 import type { PoolSide } from "./impact";
@@ -27,7 +28,10 @@ export interface Rescue {
   verdict: string;
   concern: Report["score"]["concern"];
   sell: {
+    /** Pools paired with a major asset: the only ones counted. */
     pools: PoolSide[];
+    /** Pools paired with small tokens: shown collapsed, not counted. */
+    otherPools: PoolSide[];
     totalTokenSideUsd: number;
     numMarkets: number | null;
     cex: { status: "ok"; markets: CexMarket[] } | { status: "plan" } | { status: "error" };
@@ -44,19 +48,25 @@ interface RawPool {
   t1?: { addr?: string; sym?: string; liqUsd?: string | number };
 }
 
-/** USD of OUR token in each pool (the side a sale goes into). Pure, exported for tests. */
-export function poolSides(raw: RawPool[], contract: string): PoolSide[] {
-  const c = contract.toLowerCase();
-  return raw
+/**
+ * USD of OUR token in each pool (the side a sale goes into), split into pools
+ * paired with a major asset (counted) and the rest (shown, not counted).
+ * Pure, exported for tests.
+ */
+export function poolSides(raw: RawPool[], contract: string, symbol?: string | null): { counted: PoolSide[]; other: PoolSide[] } {
+  const rows = raw
     .map((p) => {
       const total = num(p.liqUsd) ?? 0;
-      const ours = p.t0?.addr?.toLowerCase() === c ? p.t0 : p.t1?.addr?.toLowerCase() === c ? p.t1 : null;
-      const side = ours ? num(ours.liqUsd) ?? total / 2 : total / 2;
-      return { dex: p.exn ?? "DEX", pair: `${p.t0?.sym ?? "?"}/${p.t1?.sym ?? "?"}`, tokenSideUsd: side, totalUsd: total, volume24h: num(p.v24) ?? 0 };
+      const s = sidesOf(p, { contract, symbol });
+      const side = s ? num(s.ours.liqUsd) ?? total / 2 : total / 2;
+      return {
+        row: { dex: p.exn ?? "DEX", pair: `${p.t0?.sym ?? "?"}/${p.t1?.sym ?? "?"}`, tokenSideUsd: side, totalUsd: total, volume24h: num(p.v24) ?? 0 },
+        counted: countsAsLiquidity(p, { contract, symbol }),
+      };
     })
-    .filter((p) => p.tokenSideUsd >= 500) // dust pools aren't a realistic exit
-    .sort((a, b) => b.tokenSideUsd - a.tokenSideUsd)
-    .slice(0, 8);
+    .filter((x) => x.row.tokenSideUsd >= 500) // dust pools aren't a realistic exit
+    .sort((a, b) => b.row.tokenSideUsd - a.row.tokenSideUsd);
+  return { counted: rows.filter((x) => x.counted).map((x) => x.row).slice(0, 8), other: rows.filter((x) => !x.counted).map((x) => x.row).slice(0, 8) };
 }
 
 export async function buildRescue(id: number): Promise<Rescue> {
@@ -72,7 +82,7 @@ export async function buildRescue(id: number): Promise<Rescue> {
     alertsForCoins([id], 20),
   ]);
 
-  const pools = contract ? poolSides(poolsRaw, contract) : [];
+  const { counted: pools, other: otherPools } = contract ? poolSides(poolsRaw, contract, report.coin.symbol) : { counted: [], other: [] };
   let cex: Rescue["sell"]["cex"] = { status: "error" };
   if (pairs.status === "plan") cex = { status: "plan" };
   else if (pairs.status === "ok") {
@@ -93,7 +103,7 @@ export async function buildRescue(id: number): Promise<Rescue> {
     chain,
     verdict: report.verdict,
     concern: report.score.concern,
-    sell: { pools, totalTokenSideUsd: pools.reduce((s, p) => s + p.tokenSideUsd, 0), numMarkets: quotes?.num_market_pairs ?? null, cex },
+    sell: { pools, otherPools, totalTokenSideUsd: pools.reduce((s, p) => s + p.tokenSideUsd, 0), numMarkets: quotes?.num_market_pairs ?? null, cex },
     lessons: lessonsFrom({ snapshots: (snaps as Snapshot[]).slice().reverse(), alerts, report }),
     generatedAt: new Date().toISOString(),
   };

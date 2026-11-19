@@ -66,6 +66,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
     const { cmd, arg } = parsed;
+    // observability without personal data: the command name only (no chat id, no text)
+    console.info(`[tg] command=${cmd}${arg ? " with-arg" : ""}`);
     const uid = await uidForChat(chatId);
 
     switch (cmd) {

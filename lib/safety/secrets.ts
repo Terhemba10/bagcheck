@@ -15,8 +15,14 @@ export interface SecretHit {
   message: string;
 }
 
-export const SECRET_WARNING =
-  "That looks like a seed phrase or private key, so it wasn't sent. Never share it with anyone: Bagcheck, support staff and real authorities will never ask for it. If you've already shared it, move your funds to a new wallet with a new seed phrase.";
+const SECRET_ADVICE =
+  "Never share it with anyone: Bagcheck, support staff and real authorities will never ask for it. If you've already shared it, move your funds to a new wallet with a new seed phrase.";
+
+/** For things that would be sent (chat, Telegram). */
+export const SECRET_WARNING = `That looks like a seed phrase or private key, so it wasn't sent. ${SECRET_ADVICE}`;
+
+/** For the evidence form, where nothing is ever sent: it's the saving/downloading we stop. */
+export const SECRET_WARNING_SAVED = `That looks like a seed phrase or private key, so it wasn't saved. ${SECRET_ADVICE}`;
 
 /**
  * 12+ consecutive words that are ALL on the BIP-39 list. Normal sentences

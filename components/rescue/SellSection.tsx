@@ -44,7 +44,7 @@ export function SellSection({ r }: { r: Rescue }) {
       {pools.length > 0 ? (
         <GlassCard className="overflow-x-auto p-0">
           <table className="w-full min-w-[520px] text-left text-sm">
-            <caption className="px-5 pt-4 text-left text-base font-semibold">Decentralised exchange pools (live)</caption>
+            <caption className="px-5 pt-4 text-left text-base font-semibold">Decentralised exchange pools paired with major assets (live)</caption>
             <thead className="text-xs text-faint">
               <tr>
                 <th scope="col" className="px-5 py-3 font-medium">Exchange</th>
@@ -69,10 +69,28 @@ export function SellSection({ r }: { r: Rescue }) {
         <GlassCard>
           <p className="text-sm">
             {r.coin.contract
-              ? "We found no DEX pools with meaningful liquidity for this token."
+              ? "We found no DEX pools paired with a major asset (ETH, BTC, stablecoins or the chain's own coin) for this token."
               : `${r.coin.name} isn't a token in DEX pools; it trades on exchanges.`}
           </p>
         </GlassCard>
+      )}
+
+      {r.sell.otherPools.length > 0 && (
+        <details className="glass rounded-lg px-5 py-3 text-sm">
+          <summary className="cursor-pointer select-none text-muted">
+            Other pools (paired with small tokens, not counted) · {r.sell.otherPools.length}
+          </summary>
+          <ul className="mt-2 space-y-1">
+            {r.sell.otherPools.map((p, i) => (
+              <li key={i} className="tabular flex justify-between gap-3 border-t border-line pt-1 first:border-t-0">
+                <span>
+                  {p.dex} <span className="text-muted">{p.pair}</span>
+                </span>
+                <span className="text-muted">{money(p.tokenSideUsd)}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       {/* centralised exchanges */}
