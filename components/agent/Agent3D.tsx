@@ -14,7 +14,18 @@ import { AGENT_LOOKS, type AgentState } from "./states";
  */
 export const FPS_CAP = 30;
 
-export default function Agent3D({ state, active, react }: { state: AgentState; active: boolean; react: number }) {
+export default function Agent3D({
+  state,
+  active,
+  react,
+  onFirstFrame,
+}: {
+  state: AgentState;
+  active: boolean;
+  react: number;
+  /** Called once, after the first frame has rendered (used for the 2D → 3D cross-fade). */
+  onFirstFrame?: () => void;
+}) {
   return (
     <Canvas
       dpr={[1, 1.5]}
@@ -26,6 +37,7 @@ export default function Agent3D({ state, active, react }: { state: AgentState; a
       aria-hidden="true"
     >
       <FrameLimiter active={active} fps={FPS_CAP} />
+      <FirstFrame onFirstFrame={onFirstFrame} />
       <ambientLight intensity={0.3} />
       <directionalLight position={[2.5, 3, 4]} intensity={2.4} />
       <directionalLight position={[-3, -1, 2]} intensity={0.5} color="#7ab2ff" />
@@ -34,6 +46,17 @@ export default function Agent3D({ state, active, react }: { state: AgentState; a
       <Bag state={state} react={react} />
     </Canvas>
   );
+}
+
+/** Fires once after the second rendered frame (by then shaders are compiled and the orb is on screen). */
+function FirstFrame({ onFirstFrame }: { onFirstFrame?: () => void }) {
+  const frames = useRef(0);
+  useFrame(() => {
+    if (frames.current > 1) return;
+    frames.current += 1;
+    if (frames.current === 2) onFirstFrame?.();
+  });
+  return null;
 }
 
 /** Ask for a new frame at most `fps` times a second, only while active. */

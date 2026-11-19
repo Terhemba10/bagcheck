@@ -36,6 +36,14 @@ export function Agent({
   const [ready3D, setReady3D] = useState(false);
   const [active, setActive] = useState(true);
   const [react, setReact] = useState(0);
+  // cross-fade: 3D drew its first frame -> fade 2D out -> unmount 2D after the fade
+  const [drawn3D, setDrawn3D] = useState(false);
+  const [gone2D, setGone2D] = useState(false);
+  useEffect(() => {
+    if (!drawn3D) return;
+    const t = setTimeout(() => setGone2D(true), 800);
+    return () => clearTimeout(t);
+  }, [drawn3D]);
   const box = useRef<HTMLDivElement>(null);
 
   // a little reaction when the user types in the search bar
@@ -95,21 +103,45 @@ export function Agent({
   }, [mode]);
 
   const use3D = allow3D && mode === "3d" && ready3D;
+  // 3D switched off (e.g. "simple graphics"): reset the cross-fade so turning it back on fades in again
+  const [prevUse3D, setPrevUse3D] = useState(use3D);
+  if (prevUse3D !== use3D) {
+    setPrevUse3D(use3D);
+    if (!use3D) {
+      setDrawn3D(false);
+      setGone2D(false);
+    }
+  }
   const text = caption ?? AGENT_LOOKS[state].caption;
 
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>
       {/* square box: `size` px on wide screens, shrinks to 72% of the viewport on phones */}
       <div ref={box} className="relative grid aspect-square place-items-center" style={{ width: `min(${size}px, 72vw)` }}>
-        {use3D ? (
-          <div className="absolute inset-0" data-agent-state={state} data-agent-mode="3d">
-            <Agent3D state={state} active={active} react={react} />
+        {/* 3D layer: mounts when ready, stays transparent until its first frame is drawn */}
+        {use3D && (
+          <div
+            className={cn("absolute inset-0 transition-opacity duration-700 ease-out", drawn3D ? "opacity-100" : "opacity-0")}
+            data-agent-state={state}
+            data-agent-mode={drawn3D ? "3d" : "3d-loading"}
+          >
+            <Agent3D state={state} active={active} react={react} onFirstFrame={() => setDrawn3D(true)} />
           </div>
-        ) : (
-          // inset 19% on each side = 62% of the box, matching the 3D orb so the swap doesn't jump.
-          // (Absolute, not a % width: a % width inside this auto-sized grid track collapses to 0.)
-          // `key` restarts the CSS hop on each typing ping.
-          <div key={react} className={cn("absolute inset-[19%]", react > 0 && "animate-hop")}>
+        )}
+        {/* 2D layer: shown at once (also server-rendered), fades out under the 3D one, then unmounts.
+            inset 19% = 62% of the box, matching the 3D orb so the cross-fade has no size jump.
+            (Absolute, not a % width: a % width inside this auto-sized grid track collapses to 0.)
+            `key` restarts the CSS hop on each typing ping. */}
+        {!(use3D && gone2D) && (
+          <div
+            key={react}
+            aria-hidden="true"
+            className={cn(
+              "absolute inset-[19%] transition-opacity duration-700 ease-out",
+              use3D && drawn3D ? "opacity-0" : "opacity-100",
+              react > 0 && "animate-hop",
+            )}
+          >
             <Agent2D state={state} fluid />
           </div>
         )}

@@ -111,7 +111,8 @@ export function SearchBar({
       <label htmlFor={`${listId}-input`} className={cn("mb-2 block font-medium", lg ? "text-base" : "sr-only")}>
         Check any coin
       </label>
-      <div className="relative">
+      {/* z-40 anchor: the results list must sit above the chips and every later section */}
+      <div data-search-anchor className="relative z-40 scroll-mt-20">
       <div
         className={cn(
           "glass flex items-center gap-3 rounded-xl transition-shadow duration-200 focus-within:shadow-[0_0_0_2px_var(--color-teal),0_12px_40px_-12px_rgb(62_230_200/.5)]",
@@ -133,7 +134,14 @@ export function SearchBar({
           value={q}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onKey}
-          onFocus={() => setOpen(true)}
+          onFocus={(e) => {
+            setOpen(true);
+            // phones: bring the box to the top so results (and the keyboard) don't hide each other
+            if (window.innerWidth < 768) {
+              const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+              e.currentTarget.closest("[data-search-anchor]")?.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
+            }
+          }}
           onBlur={() => setTimeout(() => setOpen(false), 120)}
           placeholder="Coin name or address"
           className={cn("w-full bg-transparent outline-none placeholder:text-faint", lg ? "text-lg" : "text-base")}
@@ -145,7 +153,7 @@ export function SearchBar({
           id={`${listId}-list`}
           role="listbox"
           aria-label="Matching coins"
-          className="glass absolute top-full z-30 mt-2 max-h-80 w-full overflow-auto rounded-lg bg-bg-raised/95 p-1"
+          className="absolute top-full z-50 mt-2 max-h-80 w-full overflow-auto rounded-lg border border-line bg-bg-raised p-1 shadow-[0_24px_48px_-12px_rgb(0_0_0/.8)]"
         >
           {status === "busy" && <li className="px-3 py-2 text-sm text-warn">CoinMarketCap is busy. Try again in a minute.</li>}
           {status === "error" && <li className="px-3 py-2 text-sm text-warn">Search isn&apos;t working right now.</li>}
@@ -172,7 +180,8 @@ export function SearchBar({
       </div>
 
       {examples && (
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+        // hidden (not removed) while results are open, so the page below does not jump
+        <p aria-hidden={showList || undefined} className={cn("mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted", showList && "invisible")}>
           <span>Try:</span>
           {[
             { label: "PEPE", value: "pepe" },
