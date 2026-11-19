@@ -24,13 +24,11 @@ export function SignalCard({ title, level, value, valueLabel, meaning, why, sour
         <h3 className="text-base font-semibold">{title}</h3>
         <StatusPill level={level} size="sm" />
       </header>
-      {value ? (
+      {value && (
         <p>
           <span className="tabular text-3xl font-semibold tracking-tight">{value}</span>
           {valueLabel && <span className="ml-2 text-sm text-muted">{valueLabel}</span>}
         </p>
-      ) : (
-        <p className="text-sm text-muted">No data for this coin.</p>
       )}
       <p className="text-sm leading-relaxed">{meaning}</p>
       <details className="group text-sm text-muted">
