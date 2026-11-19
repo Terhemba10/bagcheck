@@ -88,19 +88,25 @@ let instance: KV | null = null;
 // to keep one shared copy.
 const g = globalThis as unknown as { __bagcheckMemoryKV?: MemoryKV };
 
+/** Upstash's own variable names, or the ones Vercel's Upstash integration sets. */
+function redisEnv() {
+  return {
+    url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN,
+  };
+}
+
 export function kv(): KV {
   if (instance) return instance;
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const { url, token } = redisEnv();
   if (url && token) instance = new UpstashKV(new Redis({ url, token }));
   else instance = g.__bagcheckMemoryKV ??= new MemoryKV();
   return instance;
 }
 
 export function storeBackend(): "upstash" | "memory" {
-  return process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    ? "upstash"
-    : "memory";
+  const { url, token } = redisEnv();
+  return url && token ? "upstash" : "memory";
 }
 
 /** Test helper: swap the store. */
