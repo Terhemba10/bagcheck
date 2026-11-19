@@ -40,7 +40,12 @@ export function PromiseTimeline({ id, onLoaded }: { id: number; onLoaded?: (d: P
         <h2 id="promises-title" className="text-xl font-semibold">Promise check</h2>
         {load.s === "ok" && load.data.promises.length > 0 && <Summary d={load.data} />}
       </div>
-      <p className="text-sm text-muted">What the project says it will deliver, and by when, read from its own website and docs.</p>
+      <p className="text-sm text-muted">
+        What the project says it will deliver, and by when, read from its own website and docs.
+        {load.s === "ok" && load.data.readOn && (
+          <span className="ml-1 whitespace-nowrap text-faint">· {load.data.readOn}</span>
+        )}
+      </p>
 
       <GlassCard aria-busy={load.s === "loading"} aria-live="polite">
         {load.s === "loading" && (
@@ -108,6 +113,11 @@ function PagesRead({ d }: { d: PromiseCheck }) {
               {p.url.replace(/^https?:\/\//, "")}
             </a>
             {p.note && <span className="text-faint">({p.note})</span>}
+            {p.readAt && (
+              <span className="text-faint">
+                read {new Date(p.readAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}
+              </span>
+            )}
           </li>
         ))}
       </ul>

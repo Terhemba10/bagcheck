@@ -47,6 +47,11 @@ export function focusOnRoadmap(text: string, max: number): string {
   return text.slice(start, start + max);
 }
 
+/** Developer/API docs describe how to integrate, not what the project promises investors. */
+export function isDevDocPath(pathname: string): boolean {
+  return /(^|[/._-])(api|apis|auth|sdk|reference|developers?|integration|openapi|swagger)([/._-]|$)/i.test(pathname);
+}
+
 const ROADMAP_RE = /(road\s*-?map|milestone|white\s*-?paper|lite\s*-?paper|docs|documentation|tokenomics|gitbook)/i;
 const DOC_HOSTS = /(gitbook\.io|notion\.site|github\.io|medium\.com|mirror\.xyz|substack\.com)$/i;
 
@@ -75,6 +80,7 @@ export function findRoadmapLinks(html: string, baseUrl: string, max = 2): string
     const host = u.hostname.replace(/^www\./, "");
     if (!(host === siteRoot || host.endsWith(`.${siteRoot}`) || DOC_HOSTS.test(host))) continue;
     if (/\.(pdf|png|jpe?g|zip)(\?|$)/i.test(u.pathname)) continue; // PDFs aren't read (yet)
+    if (isDevDocPath(u.pathname)) continue;
     u.hash = "";
     const url = u.toString();
     if (url === base.toString() || found.some((f) => f.url === url)) continue;
@@ -109,6 +115,40 @@ export function verifyQuote(quote: string, sourceText: string): string | null {
   if (words.length < 3) return null;
   const cut = words.slice(0, MAX_QUOTE_WORDS).join(" ");
   return norm(sourceText).includes(norm(cut)) ? cut : null;
+}
+
+/**
+ * Rebuild a verified quote from the page itself so it doesn't depend on where
+ * the AI chose to cut it: take the page line that contains it and return up to
+ * 15 words starting where the AI's quote starts. `pos` is the line's position
+ * on the page (for a stable order). Returns null if the line can't be found.
+ */
+export function canonicalQuote(quote: string, pageText: string): { quote: string; pos: number } | null {
+  const target = norm(quote);
+  const lines = pageText.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const words = lines[i]!.trim().split(/\s+/).filter(Boolean);
+    const lineNorm = norm(words.join(" "));
+    const at = lineNorm.indexOf(target);
+    if (at < 0) continue;
+    // word offset of the match inside the line
+    const match = lineNorm.slice(0, at).split(" ").filter(Boolean).length;
+    // widen to the whole sentence that contains the match (start → full stop), max 15 words,
+    // so the result doesn't depend on where the AI started or stopped its quote
+    const endsSentence = (w: string) => /[.!?]["')\]]?$/.test(w);
+    let start = match;
+    while (start > 0 && !endsSentence(words[start - 1]!)) start--;
+    let end = start;
+    while (end < words.length && end - start < MAX_QUOTE_WORDS) {
+      end++;
+      if (endsSentence(words[end - 1]!)) break;
+    }
+    // list bullets come from htmlToText, not from the page's words
+    const quoteWords = words.slice(start, end);
+    while (quoteWords.length && /^[•·▪◦\-–—*]+$/.test(quoteWords[0]!)) quoteWords.shift();
+    return { quote: quoteWords.join(" "), pos: i * 1000 + start };
+  }
+  return null;
 }
 
 /** Accept 2026 · 2026-Q3 · 2026-H2 · 2026-09 · 2026-09-30; anything else → null. */

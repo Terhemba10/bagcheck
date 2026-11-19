@@ -20,6 +20,8 @@ Plan: `docs/PLAN.md`. Current state and next steps: **`docs/STATUS.md`** (read i
 - Windows PowerShell 5.1 reads/writes files as ANSI and garbles UTF-8 (≥, →, …). Edit files with the Edit/Write tools or Python/sed in Bash, not PowerShell `Get-Content`/`Set-Content`.
 - Run `npx tsx` scripts that call `page.evaluate` with the `__name` shim (see `scripts/measure-agent-fps.ts`).
 - The browser pane may be hidden; hidden pages don't run requestAnimationFrame, so 3D won't render there. Use Playwright with `channel: "chrome", headless: false` for real-GPU checks.
+- **Stopping servers:** `kill` in Bash only stops the `npx` wrapper on Windows; the node server keeps the port and later requests silently hit the OLD server. Stop by port owner (`Get-NetTCPConnection -LocalPort N | Stop-Process`), or use `scripts/compare-promise-runs.ps1`, which does this and prints each server's start time.
+- In Python heredoc edits, `"\n"` inside TS string literals can turn into a real newline; prefer the Edit tool for lines with escapes.
 - Vitest config is `vitest.config.mts`. Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to silence a warning.
 
 ## Commands

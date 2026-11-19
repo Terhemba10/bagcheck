@@ -12,7 +12,9 @@ Rules:
 - "dueDate": use YYYY, YYYY-Q1..Q4, YYYY-MM or YYYY-MM-DD when the page gives a time; null when it doesn't. Do not guess dates.
 - If an item is described as already done, set "alreadyDone": true.
 - Set "kind" to "commitment" only for something the project says it WILL deliver. Use "existing" for features, products or instructions that already exist (for example install commands, how-to steps, current product descriptions).
-- Return at most 12 items, most specific first. If there are none, return an empty list.
+- One item per roadmap line, bullet or sentence. NEVER combine two deliverables into one item, and never split one sentence into two items.
+- Keep the items in the order they appear on the page.
+- Return at most 12 items. If there are none, return an empty list.
 - Do not judge the project, give advice, or say whether to buy or sell.`;
 
 export function extractPromisesPrompt(coin: { name: string; symbol: string }, pages: { url: string; text: string }[], today: string): string {

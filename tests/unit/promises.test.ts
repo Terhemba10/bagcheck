@@ -28,6 +28,10 @@ describe("findRoadmapLinks", () => {
       "https://example.gitbook.io/x",
     ]);
   });
+  it("skips developer / API documentation pages", () => {
+    const dev = `<a href="/auth.md">Docs</a><a href="/developers/api">API docs</a><a href="/sdk/reference">SDK</a><a href="/roadmap">Roadmap</a>`;
+    expect(findRoadmapLinks(dev, "https://www.example.com/", 3)).toEqual(["https://www.example.com/roadmap"]);
+  });
   it("falls back to plain docs links when nothing better exists", () => {
     expect(findRoadmapLinks(`<a href="https://docs.example.com/intro">Docs</a>`, "https://www.example.com/", 2)).toEqual(["https://docs.example.com/intro"]);
   });
