@@ -20,8 +20,8 @@ export function Agent2D({
   const look = AGENT_LOOKS[state];
   const c = look.color;
   const id = `bag-${state}`;
-  const motion =
-    state === "danger" ? "animate-sway" : state === "concern" ? "" : "animate-bob";
+  // no shaking anywhere: danger gets a slow deep glow pulse and a shield ring instead
+  const motion = state === "concern" ? "" : "animate-bob";
 
   return (
     <div
@@ -64,6 +64,19 @@ export function Agent2D({
             <rect x="117" y="86" width="13" height="22" rx="6.5" />
           </g>
           <Mouth kind={look.mouth} color={c} />
+          {/* protective shield ring (danger) */}
+          {look.shield && (
+            <polygon
+              points="100,8 179.7,54 179.7,146 100,192 20.3,146 20.3,54"
+              fill="none"
+              stroke={c}
+              strokeOpacity="0.55"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              className="origin-center animate-breathe"
+              style={{ transformBox: "fill-box", animationDuration: `${look.breathe}s` }}
+            />
+          )}
           {/* scanning rings */}
           {look.rings && (
             <g className="origin-center animate-orbit" style={{ transformBox: "fill-box" }}>
