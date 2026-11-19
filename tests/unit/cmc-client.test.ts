@@ -86,6 +86,15 @@ describe("cmcRequest", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
+  it("logs key-info calls to evidence at most once per window, but always logs failures", async () => {
+    let call = 0;
+    const fetchImpl = vi.fn(async () => (call++ < 3 ? ok({ plan: {}, usage: {} }, 0) : jsonResponse(500, {})));
+    for (let i = 0; i < 3; i++) await cmcRequest("keyInfo", {}, { fetchImpl: fetchImpl as typeof fetch, fresh: true });
+    expect((await listEvidence()).filter((e) => e.endpoint === "keyInfo")).toHaveLength(1);
+    await cmcRequest("keyInfo", {}, { fetchImpl: fetchImpl as typeof fetch, fresh: true, sleep: noSleep }).catch(() => undefined);
+    expect((await listEvidence()).filter((e) => e.endpoint === "keyInfo" && e.httpStatus === 500).length).toBeGreaterThan(0);
+  });
+
   it("fails clearly when no key is configured", async () => {
     vi.stubEnv("CMC_API_KEY", "");
     await expect(cmcRequest("globalMetrics", {})).rejects.toMatchObject({ kind: "auth" });

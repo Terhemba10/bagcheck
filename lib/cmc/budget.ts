@@ -46,6 +46,8 @@ export const GOVERNOR = {
   dailyReserve: 150,
   /** Below this many monthly credits left, monitoring stops. */
   pauseFloor: 300,
+  /** Plans with this many monthly credits or fewer are capped at the Basic schedule. */
+  smallPlanLimit: 50_000,
 };
 
 /** Rough credits one run costs in a mode, for N watched coins. */
@@ -97,7 +99,12 @@ export function decideMode(info: KeyInfo | null, watchedCoins: number, now = new
   if (dayLeft !== null) allowance = Math.min(allowance, Math.max(0, dayLeft - GOVERNOR.dailyReserve));
   if (!Number.isFinite(allowance)) allowance = 1000;
 
-  const order: MonitorMode[] = ["full", "lean", "basic"];
+  // Strict cap on small plans: a Basic key (15k/month) never runs more than the
+  // Basic schedule, however many credits are left, so judges' live reports always
+  // have room.
+  const monthlyLimit = numOr(info.plan.credit_limit_monthly, null);
+  const order: MonitorMode[] =
+    monthlyLimit !== null && monthlyLimit <= GOVERNOR.smallPlanLimit ? ["basic"] : ["full", "lean", "basic"];
   for (const mode of order) {
     if (estimateDailyCost(mode, watchedCoins) <= allowance) {
       return finish(mode, allowance, monthLeft, dayLeft, daysUntilReset, `Allowance ${Math.floor(allowance)} credits/day`);

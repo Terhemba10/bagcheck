@@ -16,6 +16,8 @@ export interface EndpointDef {
   ttl: number;
   /** What Bagcheck uses it for (shown on /evidence). */
   purpose: string;
+  /** Log successful calls to the evidence list at most this often (seconds). Errors are always logged. */
+  evidenceEvery?: number;
 }
 
 export const ENDPOINTS = {
@@ -118,6 +120,8 @@ export const ENDPOINTS = {
     minPlan: "basic",
     ttl: 30,
     purpose: "Credits left and plan limits (credit governor)",
+    // called on every /evidence view; one sample per 10 min keeps the log readable
+    evidenceEvery: 600,
   },
 } as const satisfies Record<string, EndpointDef>;
 

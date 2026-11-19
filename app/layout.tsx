@@ -1,27 +1,30 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import { CornerAgent } from "@/components/agent/CornerAgent";
+import { SiteFooter, SiteHeader, SkipLink } from "@/components/SiteChrome";
 import "./globals.css";
 
+const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
+
 export const metadata: Metadata = {
-  title: "Bagcheck",
-  description: "Did the founders keep their promises, and can you still get out? Plain-English crypto risk checks built on CoinMarketCap data.",
+  title: { default: "Bagcheck", template: "%s · Bagcheck" },
+  description:
+    "Did the founders keep their promises, and can you still get out? Plain-English crypto risk checks built on CoinMarketCap data.",
 };
+
+export const viewport: Viewport = { themeColor: "#070b18", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans antialiased">
-        <header className="border-b border-white/5">
-          <nav className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-4 text-sm" aria-label="Main">
-            <Link href="/" className="font-semibold tracking-tight text-white">
-              Bagcheck
-            </Link>
-            <Link href="/evidence" className="text-mist hover:text-white">
-              API evidence
-            </Link>
-          </nav>
-        </header>
-        <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
+        <SkipLink />
+        <SiteHeader />
+        <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-10 outline-none sm:px-6 lg:px-8">
+          {children}
+        </main>
+        <SiteFooter />
+        <CornerAgent />
       </body>
     </html>
   );

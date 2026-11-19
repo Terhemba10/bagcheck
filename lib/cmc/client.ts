@@ -177,7 +177,7 @@ async function fetchLive<T>(
 
     if (httpStatus) {
       const status = extractStatus(body);
-      await recordEvidence({
+      if (await shouldRecordEvidence(endpoint, def, httpStatus)) await recordEvidence({
         endpoint,
         path: def.path,
         method: def.method,
@@ -224,6 +224,15 @@ async function fetchLive<T>(
   }
 
   throw lastError ?? new CmcError("upstream", endpoint, "Unknown error");
+}
+
+/** Rate-limit noisy endpoints in the evidence log; failures are always kept. */
+async function shouldRecordEvidence(endpoint: EndpointKey, def: EndpointDef, httpStatus: number): Promise<boolean> {
+  if (!def.evidenceEvery || httpStatus >= 300) return true;
+  const flag = `cmc:ev:last:${endpoint}`;
+  if (await safeGet<number>(flag)) return false;
+  await safeSet(flag, Date.now(), def.evidenceEvery);
+  return true;
 }
 
 function extractStatus(body: unknown): CmcStatus {

@@ -25,16 +25,23 @@ describe("credit governor", () => {
     expect(d.mode).toBe("full");
   });
 
-  it("drops to a cheaper mode on Basic credits", () => {
-    // 4,000 left over 15 days -> ~93 credits/day for monitoring; full (~168/day for 30 coins) doesn't fit
-    const d = decideMode(info(4_000, 500, 15), 30, now);
-    expect(["lean", "basic"]).toContain(d.mode);
+  it("drops to lean on a mid-size plan when full doesn't fit", () => {
+    // 150k plan, 4,000 left over 15 days -> ~93 credits/day; full (~168/day for 30 coins) doesn't fit
+    const d = decideMode(info(4_000, 500, 15, 150_000), 30, now);
+    expect(d.mode).toBe("lean");
     // never plans to spend more than 35% of what's left, spread over the days to reset
     expect(estimateDailyCost(d.mode, 30)).toBeLessThanOrEqual((0.35 * 4_000) / 15);
   });
 
+  it("caps a Basic key (15k/month) at the Basic schedule even with credits to spare", () => {
+    const d = decideMode(info(14_957, null, 11), 30, now);
+    expect(d.mode).toBe("basic");
+    // a whole month of Basic monitoring stays tiny
+    expect(estimateDailyCost("basic", 30) * 30).toBeLessThan(300);
+  });
+
   it("keeps a daily reserve for live reports", () => {
-    const d = decideMode(info(9_000, 160, 15), 10, now);
+    const d = decideMode(info(9_000, 160, 15, 150_000), 10, now);
     // only 10 credits/day available after the 150 reserve
     expect(d.perDayAllowance).toBeLessThanOrEqual(10);
     expect(estimateDailyCost(d.mode, 10)).toBeLessThanOrEqual(10);
