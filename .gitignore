@@ -1,0 +1,21 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# deps / build
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.vercel/
+
+# test artifacts
+playwright-report/
+test-results/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log
