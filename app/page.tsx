@@ -17,16 +17,18 @@ const STAGES = [
     Icon: IconBell,
     title: "While you hold",
     body: "Bag re-checks your coins and warns you on Telegram when promises slip or warning signs appear.",
-    cta: "Open watchlist",
+    cta: "Coming soon",
     href: "/watchlist",
+    soon: true,
     tone: "text-warn",
   },
   {
     Icon: IconLifebuoy,
     title: "If it went wrong",
     body: "Can you still sell? Protect what's left, gather evidence, and avoid recovery scammers.",
-    cta: "Open rescue plan",
+    cta: "Coming soon",
     href: "/rescue",
+    soon: true,
     tone: "text-rescue",
   },
 ];
@@ -46,11 +48,11 @@ export default function Home() {
             </p>
           </div>
           <div id="search" className="max-w-xl scroll-mt-24">
-            <SearchBar autoFocus={false} />
+            <SearchBar examples />
           </div>
         </div>
         <div className="order-1 flex justify-center lg:order-2">
-          <Agent state="idle" size={360} />
+          <Agent state="idle" size={360} reactToTyping />
         </div>
       </section>
 
@@ -62,9 +64,13 @@ export default function Home() {
               <s.Icon className={`size-7 ${s.tone}`} />
               <h3 className="text-lg font-semibold">{s.title}</h3>
               <p className="text-sm leading-relaxed text-muted">{s.body}</p>
-              <Link href={s.href} className="mt-auto inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-teal hover:underline">
-                {s.cta} <IconArrowRight className="size-4" />
-              </Link>
+              {"soon" in s && s.soon ? (
+                <span className="mt-auto inline-flex min-h-11 items-center text-sm font-medium text-faint">Coming soon</span>
+              ) : (
+                <Link href={s.href} className="mt-auto inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-teal hover:underline">
+                  {s.cta} <IconArrowRight className="size-4" />
+                </Link>
+              )}
             </GlassCard>
           ))}
         </ul>

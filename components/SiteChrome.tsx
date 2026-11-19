@@ -3,13 +3,18 @@ import { GraphicsToggle } from "@/components/agent/GraphicsToggle";
 import { MobileMenu } from "@/components/MobileMenu";
 import { DISCLAIMER } from "@/components/ui/Notice";
 
-const NAV = [
-  { href: "/", label: "Check a coin" },
-  { href: "/watchlist", label: "Watchlist" },
-  { href: "/rescue", label: "Rescue" },
-  { href: "/connect", label: "Connect" },
-  { href: "/evidence", label: "API evidence" },
+/**
+ * Site navigation. Set `ready: true` as each screen ships; unbuilt ones stay
+ * out of the nav (their URLs show a friendly "Coming soon" page).
+ */
+const ALL_NAV = [
+  { href: "/", label: "Check a coin", ready: true },
+  { href: "/watchlist", label: "Watchlist", ready: false },
+  { href: "/rescue", label: "Rescue", ready: false },
+  { href: "/connect", label: "Connect", ready: false },
+  { href: "/evidence", label: "API evidence", ready: true },
 ];
+const NAV = ALL_NAV.filter((n) => n.ready);
 
 export function SkipLink() {
   return (

@@ -18,6 +18,8 @@ export interface EndpointDef {
   purpose: string;
   /** Log successful calls to the evidence list at most this often (seconds). Errors are always logged. */
   evidenceEvery?: number;
+  /** Costs no credits (skips the credit guard). */
+  free?: boolean;
 }
 
 export const ENDPOINTS = {
@@ -27,6 +29,7 @@ export const ENDPOINTS = {
     minPlan: "basic",
     ttl: 24 * 3600,
     purpose: "Resolve a name, symbol or slug to a CMC id",
+    free: true,
   },
   info: {
     path: "/v2/cryptocurrency/info",
@@ -120,6 +123,7 @@ export const ENDPOINTS = {
     minPlan: "basic",
     ttl: 30,
     purpose: "Credits left and plan limits (credit governor)",
+    free: true,
     // called on every /evidence view; one sample per 10 min keeps the log readable
     evidenceEvery: 600,
   },

@@ -44,6 +44,12 @@
   --animate-bob: bob 6s ease-in-out infinite;
   --animate-orbit: orbit 2.4s linear infinite;
   --animate-sway: sway 0.85s ease-in-out infinite;
+  --animate-hop: hop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 1;
+}
+
+@keyframes hop {
+  0%, 100% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-8%) scale(1.03, 1.05); }
 }
 
 @keyframes shimmer {

@@ -4,6 +4,8 @@ import { CMC_BASE_URL, ENDPOINTS, type EndpointDef, type EndpointKey } from "./e
 import { CmcError, classifyCmcResponse } from "./errors";
 import { getCapability, isForcedBlocked, markCapability } from "./capabilities";
 import { recordEvidence } from "./evidence";
+import type { KeyInfo } from "./budget";
+import { checkSpend, guardConfig } from "./guard";
 
 /**
  * The only place in the app that talks to CoinMarketCap.
@@ -45,6 +47,8 @@ export interface RequestOptions {
   ttl?: number;
   /** Set false for very large responses (e.g. the full id map) that the caller caches itself in compact form. */
   sharedCache?: boolean;
+  /** Skip the credit guard (tests only). */
+  skipGuard?: boolean;
   /** Test seam. */
   fetchImpl?: typeof fetch;
   /** Test seam: skip sleeps. */
@@ -89,7 +93,7 @@ export async function cmcRequest<T = unknown>(
 ): Promise<CmcResult<T>> {
   const params = cleanParams(rawParams);
   const key = cacheKey(endpoint, params, opts.body);
-  const def = ENDPOINTS[endpoint];
+  const def: EndpointDef = ENDPOINTS[endpoint];
   const ttl = opts.ttl ?? def.ttl;
 
   // 1. Fresh cache
@@ -113,6 +117,11 @@ export async function cmcRequest<T = unknown>(
       const cap = await getCapability(endpoint);
       if (cap.state === "plan_blocked") {
         throw new CmcError("plan_blocked", endpoint, "Endpoint not included in the current CMC plan", cap.code ?? 1006, 403);
+      }
+      // 4. Credit guard: refuse paid calls past the daily cap / monthly reserve
+      if (!def.free && !opts.skipGuard && process.env.CMC_CREDIT_GUARD !== "off") {
+        const verdict = checkSpend(await usageSnapshot(opts), guardConfig(), await creditsUsedToday());
+        if (!verdict.allow) throw new CmcError("budget_reserve", endpoint, verdict.reason);
       }
       const live = await fetchLive<T>(endpoint, params, opts);
       const value: CachedValue<T> = { data: live.data, status: live.status, fetchedAt: new Date().toISOString() };
@@ -224,6 +233,16 @@ async function fetchLive<T>(
   }
 
   throw lastError ?? new CmcError("upstream", endpoint, "Unknown error");
+}
+
+/** Live usage for the credit guard: /v1/key/info (free), cached 60 s. Null if unavailable. */
+async function usageSnapshot(opts: RequestOptions): Promise<KeyInfo | null> {
+  try {
+    const r = await cmcRequest<KeyInfo>("keyInfo", {}, { ttl: 60, fetchImpl: opts.fetchImpl, sleep: opts.sleep });
+    return r.data;
+  } catch {
+    return null;
+  }
 }
 
 /** Rate-limit noisy endpoints in the evidence log; failures are always kept. */

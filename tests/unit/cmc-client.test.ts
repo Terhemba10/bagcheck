@@ -21,6 +21,7 @@ beforeEach(() => {
   __resetClientState();
   vi.stubEnv("CMC_API_KEY", KEY);
   vi.stubEnv("CMC_FORCE_PLAN", "");
+  vi.stubEnv("CMC_CREDIT_GUARD", "off"); // guard has its own tests below
 });
 afterEach(() => vi.unstubAllEnvs());
 
@@ -100,6 +101,42 @@ describe("cmcRequest", () => {
     await expect(cmcRequest("globalMetrics", {})).rejects.toMatchObject({ kind: "auth" });
   });
 });
+
+describe("credit guard (wired into cmcRequest)", () => {
+  const keyInfo = (usedToday: number, monthLeft: number) =>
+    ok({ plan: { credit_limit_monthly: 15000 }, usage: { current_day: { credits_used: usedToday }, current_month: { credits_left: monthLeft } } }, 0);
+
+  it("blocks paid calls past the daily cap and serves the last good copy", async () => {
+    vi.stubEnv("CMC_CREDIT_GUARD", "on");
+    vi.stubEnv("CMC_DAILY_CREDIT_CAP", "100");
+    let used = 10;
+    const fetchImpl = vi.fn(async (url: URL | RequestInfo) => (String(url).includes("/key/info") ? keyInfo(used, 9000) : ok({ v: 1 })));
+    const first = await cmcRequest("globalMetrics", {}, { fetchImpl: fetchImpl as typeof fetch });
+    expect(first.source).toBe("live");
+
+    used = 100; // cap reached
+    __resetClientState(); // drop the cached key info so the new usage is read
+    await __setKVKeepEvidence();
+    const second = await cmcRequest("globalMetrics", {}, { fetchImpl: fetchImpl as typeof fetch, fresh: true });
+    expect(second.source).toBe("stale");
+    expect(second.staleReason).toBe("budget_reserve");
+  });
+
+  it("never blocks free endpoints", async () => {
+    vi.stubEnv("CMC_CREDIT_GUARD", "on");
+    vi.stubEnv("CMC_DAILY_CREDIT_CAP", "0");
+    const fetchImpl = vi.fn(async () => ok([{ id: 1, name: "Bitcoin", symbol: "BTC", slug: "bitcoin" }], 0));
+    const r = await cmcRequest("map", {}, { fetchImpl: fetchImpl as typeof fetch });
+    expect(r.source).toBe("live");
+  });
+});
+
+/** Clear cached key info in the shared store while keeping last-good copies. */
+async function __setKVKeepEvidence() {
+  const { kv } = await import("@/lib/store/kv");
+  const { cacheKey } = await import("@/lib/cmc/client");
+  await kv().del(cacheKey("keyInfo", {}));
+}
 
 describe("search helpers", () => {
   const coins = [

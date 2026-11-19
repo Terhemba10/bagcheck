@@ -20,6 +20,7 @@ export function Agent({
   caption,
   showCaption = true,
   allow3D = true,
+  reactToTyping = false,
   className,
 }: {
   state: AgentState;
@@ -27,12 +28,23 @@ export function Agent({
   caption?: string;
   showCaption?: boolean;
   allow3D?: boolean;
+  /** Hop and glance at the search box when the user types. */
+  reactToTyping?: boolean;
   className?: string;
 }) {
   const [mode, setMode] = useState<GraphicsMode>("2d");
   const [ready3D, setReady3D] = useState(false);
   const [active, setActive] = useState(true);
+  const [react, setReact] = useState(0);
   const box = useRef<HTMLDivElement>(null);
+
+  // a little reaction when the user types in the search bar
+  useEffect(() => {
+    if (!reactToTyping) return;
+    const onType = () => setReact((n) => n + 1);
+    window.addEventListener("bagcheck:typing", onType);
+    return () => window.removeEventListener("bagcheck:typing", onType);
+  }, [reactToTyping]);
 
   // pick graphics mode (re-check when the user flips the toggle)
   useEffect(() => {
@@ -91,12 +103,13 @@ export function Agent({
       <div ref={box} className="relative grid aspect-square place-items-center" style={{ width: `min(${size}px, 72vw)` }}>
         {use3D ? (
           <div className="absolute inset-0" data-agent-state={state} data-agent-mode="3d">
-            <Agent3D state={state} active={active} />
+            <Agent3D state={state} active={active} react={react} />
           </div>
         ) : (
           // inset 19% on each side = 62% of the box, matching the 3D orb so the swap doesn't jump.
           // (Absolute, not a % width: a % width inside this auto-sized grid track collapses to 0.)
-          <div className="absolute inset-[19%]">
+          // `key` restarts the CSS hop on each typing ping.
+          <div key={react} className={cn("absolute inset-[19%]", react > 0 && "animate-hop")}>
             <Agent2D state={state} fluid />
           </div>
         )}

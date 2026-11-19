@@ -12,6 +12,8 @@ export interface KV {
   /** Push to the front of a list and keep only the newest `max` items. */
   pushCapped<T>(key: string, value: T, max: number): Promise<void>;
   list<T>(key: string, count: number): Promise<T[]>;
+  /** Atomically add 1 and return the new value; the TTL is set when the key is created. */
+  incr(key: string, ttlSeconds: number): Promise<number>;
 }
 
 class MemoryKV implements KV {
@@ -43,6 +45,15 @@ class MemoryKV implements KV {
   async list<T>(key: string, count: number): Promise<T[]> {
     return ((await this.get<T[]>(key)) ?? []).slice(0, count);
   }
+  async incr(key: string, ttlSeconds: number): Promise<number> {
+    const hit = this.map.get(key);
+    if (!hit || (hit.expires !== null && hit.expires < Date.now())) {
+      this.map.set(key, { value: 1, expires: Date.now() + ttlSeconds * 1000 });
+      return 1;
+    }
+    hit.value = (hit.value as number) + 1;
+    return hit.value as number;
+  }
 }
 
 class UpstashKV implements KV {
@@ -62,6 +73,11 @@ class UpstashKV implements KV {
   }
   async list<T>(key: string, count: number) {
     return (await this.redis.lrange<T>(key, 0, count - 1)) ?? [];
+  }
+  async incr(key: string, ttlSeconds: number) {
+    const n = await this.redis.incr(key);
+    if (n === 1) await this.redis.expire(key, ttlSeconds);
+    return n;
   }
 }
 

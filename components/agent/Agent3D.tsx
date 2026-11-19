@@ -1,106 +1,166 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { AGENT_LOOKS, type AgentState } from "./states";
 
 /**
- * Bag in 3D. Built for integrated graphics:
- *  - no transmission, no env maps, no post-processing
- *  - ~6 draw calls, dpr capped at 1.5
- *  - the frame loop stops when `active` is false (off-screen or tab hidden)
+ * Bag in 3D. Built for integrated graphics (target: Intel HD 520):
+ *  - rendering capped at 30 fps (FrameLimiter), stopped when off-screen / tab hidden
+ *  - no transmission, env maps or post-processing; ~9 draw calls
+ *  - particles animate in the vertex shader (no per-frame CPU work)
+ *  - dpr capped at 1.5
  */
-export default function Agent3D({ state, active }: { state: AgentState; active: boolean }) {
+export const FPS_CAP = 30;
+
+export default function Agent3D({ state, active, react }: { state: AgentState; active: boolean; react: number }) {
   return (
     <Canvas
       dpr={[1, 1.5]}
-      // "demand" (not "never") when paused, so a resize still redraws one frame instead of leaving a blank canvas
-      frameloop={active ? "always" : "demand"}
-      // view height at the orb ≈ 2·4.8·tan(19°) ≈ 3.3 units: room for the orb (r=1) and rings (r≤1.4)
+      frameloop="demand"
+      // view height at the orb ≈ 2·4.8·tan(19°) ≈ 3.3 units: room for the orb (r=1), ring and particles (r≤1.55)
       camera={{ position: [0, 0, 4.8], fov: 38 }}
       gl={{ antialias: true, alpha: true, powerPreference: "default" }}
       style={{ background: "transparent" }}
       aria-hidden="true"
     >
-      <ambientLight intensity={0.35} />
-      <directionalLight position={[2.5, 3, 4]} intensity={2.2} />
+      <FrameLimiter active={active} fps={FPS_CAP} />
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[2.5, 3, 4]} intensity={2.4} />
       <directionalLight position={[-3, -1, 2]} intensity={0.5} color="#7ab2ff" />
-      <Bag state={state} />
+      {/* back rim light */}
+      <directionalLight position={[0, 2, -4]} intensity={1.6} color="#ffffff" />
+      <Bag state={state} react={react} />
     </Canvas>
   );
 }
 
-const tmpColor = new THREE.Color();
+/** Ask for a new frame at most `fps` times a second, only while active. */
+function FrameLimiter({ active, fps }: { active: boolean; fps: number }) {
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    invalidate(); // always draw at least one frame (also after resizes)
+    if (!active) return;
+    let raf = 0;
+    let last = 0;
+    const interval = 1000 / fps;
+    const loop = (t: number) => {
+      raf = requestAnimationFrame(loop);
+      if (t - last >= interval - 1) {
+        last = t;
+        invalidate();
+      }
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [active, fps, invalidate]);
+  return null;
+}
 
-function Bag({ state }: { state: AgentState }) {
+const tmpColor = new THREE.Color();
+const ease = (d: number, k: number) => 1 - Math.exp(-d * k);
+
+function Bag({ state, react }: { state: AgentState; react: number }) {
   const look = AGENT_LOOKS[state];
   const root = useRef<THREE.Group>(null);
   const tilt = useRef<THREE.Group>(null);
   const coreMat = useRef<THREE.MeshBasicMaterial>(null);
   const glowMat = useRef<THREE.SpriteMaterial>(null);
   const bodyMat = useRef<THREE.MeshPhysicalMaterial>(null);
-  const eyes = useRef<THREE.Group>(null);
-  const rings = useRef<THREE.Group>(null);
-  const ringMats = useRef<THREE.MeshBasicMaterial[]>([]);
   const rimMat = useRef<THREE.ShaderMaterial>(null);
+  const eyes = useRef<THREE.Group>(null);
+  const scanRings = useRef<THREE.Group>(null);
+  const ringMats = useRef<THREE.MeshBasicMaterial[]>([]);
+  const haloRing = useRef<THREE.Mesh>(null);
+  const haloMat = useRef<THREE.MeshBasicMaterial>(null);
+  const particleMat = useRef<THREE.ShaderMaterial>(null);
   const pulse = useRef({ last: state, t: 0 });
+  const hop = useRef({ last: react, t: 0 });
 
   const glowTexture = useMemo(() => makeGlowTexture(), []);
   const rimShader = useMemo(() => makeRimShader(look.color), []); // eslint-disable-line react-hooks/exhaustive-deps -- colour is eased per frame
+  const particles = useMemo(() => makeParticles(70, look.color), []); // eslint-disable-line react-hooks/exhaustive-deps -- colour is eased per frame
   const target = useMemo(() => new THREE.Color(look.color), [look.color]);
 
   useFrame((s, dt) => {
     const t = s.clock.elapsedTime;
-    const d = Math.min(dt, 0.05);
+    const d = Math.min(dt, 0.1);
 
     // state change -> one soft pulse
-    if (pulse.current.last !== state) {
-      pulse.current = { last: state, t: 0.9 };
-    }
+    if (pulse.current.last !== state) pulse.current = { last: state, t: 0.9 };
     pulse.current.t = Math.max(0, pulse.current.t - d);
     const p = Math.sin((pulse.current.t / 0.9) * Math.PI) * 0.06;
 
-    // colour easing
-    for (const m of [coreMat.current, glowMat.current]) m?.color.lerp(target, 1 - Math.exp(-d * 4));
-    if (bodyMat.current) bodyMat.current.emissive.lerp(tmpColor.copy(target).multiplyScalar(0.18), 1 - Math.exp(-d * 4));
-    for (const m of ringMats.current) m?.color.lerp(target, 1 - Math.exp(-d * 4));
-    if (rimMat.current) (rimMat.current.uniforms.uColor!.value as THREE.Color).lerp(target, 1 - Math.exp(-d * 4));
+    // typing -> small hop (0.45 s)
+    if (hop.current.last !== react) hop.current = { last: react, t: 0.45 };
+    hop.current.t = Math.max(0, hop.current.t - d);
+    const h = Math.sin((hop.current.t / 0.45) * Math.PI);
+
+    // colour easing (all parts follow the state colour)
+    const k = ease(d, 4);
+    coreMat.current?.color.lerp(target, k);
+    glowMat.current?.color.lerp(target, k);
+    haloMat.current?.color.lerp(target, k);
+    for (const m of ringMats.current) m?.color.lerp(target, k);
+    bodyMat.current?.emissive.lerp(tmpColor.copy(target).multiplyScalar(0.18), k);
+    if (rimMat.current) (rimMat.current.uniforms.uColor!.value as THREE.Color).lerp(target, k);
+    if (particleMat.current) {
+      particleMat.current.uniforms.uTime!.value = t;
+      (particleMat.current.uniforms.uColor!.value as THREE.Color).lerp(target, k);
+      particleMat.current.uniforms.uSpeed!.value = THREE.MathUtils.damp(particleMat.current.uniforms.uSpeed!.value as number, look.rings ? 2.2 : 1, 3, d);
+    }
 
     if (root.current) {
       const breathe = 1 + Math.sin((t * Math.PI * 2) / look.breathe) * 0.025 + p;
-      root.current.scale.setScalar(breathe);
-      root.current.position.y = Math.sin(t * 0.9) * 0.06;
+      // squash-and-stretch on the hop
+      root.current.scale.set(breathe * (1 + h * 0.03), breathe * (1 + h * 0.05), breathe);
+      root.current.position.y = Math.sin(t * 0.9) * 0.06 + h * 0.12;
     }
     if (tilt.current) {
-      // gentle look toward the pointer, lean for concern, small sway for danger (no flashing)
+      // look toward the pointer, lean for concern, small sway for danger (no flashing)
       const leanZ = THREE.MathUtils.degToRad(-look.lean) + THREE.MathUtils.degToRad(look.sway) * Math.sin(t * Math.PI * 2 * 1.2);
       tilt.current.rotation.z = THREE.MathUtils.damp(tilt.current.rotation.z, leanZ, 6, d);
-      tilt.current.rotation.y = THREE.MathUtils.damp(tilt.current.rotation.y, s.pointer.x * 0.35, 3, d);
-      tilt.current.rotation.x = THREE.MathUtils.damp(tilt.current.rotation.x, -s.pointer.y * 0.2, 3, d);
+      tilt.current.rotation.y = THREE.MathUtils.damp(tilt.current.rotation.y, s.pointer.x * 0.35 + (hop.current.t > 0 ? -0.25 : 0), 3, d);
+      tilt.current.rotation.x = THREE.MathUtils.damp(tilt.current.rotation.x, -s.pointer.y * 0.2 + (hop.current.t > 0 ? 0.12 : 0), 3, d);
     }
     if (eyes.current) {
-      const glance = look.rings ? Math.sin(t * 2.2) * 0.06 : 0;
-      eyes.current.position.x = THREE.MathUtils.damp(eyes.current.position.x, glance, 8, d);
-      // blink every ~5 s
-      const blink = (t % 5.2) > 5.05 ? 0.15 : 1;
+      // scanning: glance side to side; typing: look down-left toward the search box
+      const glanceX = look.rings ? Math.sin(t * 2.2) * 0.06 : hop.current.t > 0 ? -0.05 : 0;
+      const glanceY = hop.current.t > 0 ? -0.04 : 0;
+      eyes.current.position.x = THREE.MathUtils.damp(eyes.current.position.x, glanceX, 8, d);
+      eyes.current.position.y = THREE.MathUtils.damp(eyes.current.position.y, glanceY, 8, d);
+      const blink = t % 5.2 > 5.05 ? 0.15 : 1; // blink every ~5 s
       eyes.current.scale.y = THREE.MathUtils.damp(eyes.current.scale.y, blink, 30, d);
     }
-    if (rings.current) {
-      rings.current.visible = look.rings;
+    if (haloRing.current) haloRing.current.rotation.z += d * 0.15;
+    if (scanRings.current) {
+      scanRings.current.visible = look.rings;
       if (look.rings) {
-        rings.current.children[0]!.rotation.z += d * 1.4;
-        rings.current.children[1]!.rotation.z -= d * 1.0;
+        scanRings.current.children[0]!.rotation.z += d * 1.4;
+        scanRings.current.children[1]!.rotation.z -= d * 1.0;
       }
     }
   });
 
   return (
     <group ref={root}>
-      {/* soft halo: must stay inside the camera's ~2.9-unit view or the canvas edge shows */}
+      {/* soft halo: stays inside the ~3.3-unit view so the canvas edge never shows */}
       <sprite scale={[3.1, 3.1, 1]} renderOrder={-1}>
-        <spriteMaterial ref={glowMat} map={glowTexture} color={look.color} transparent opacity={0.45} depthWrite={false} blending={THREE.AdditiveBlending} />
+        <spriteMaterial ref={glowMat} map={glowTexture} color={look.color} transparent opacity={0.42} depthWrite={false} blending={THREE.AdditiveBlending} />
       </sprite>
+
+      {/* slow floating particles */}
+      <points geometry={particles.geometry}>
+        <shaderMaterial ref={particleMat} args={[particles.shader]} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+      </points>
+
+      {/* faint orbit ring, always there */}
+      <mesh ref={haloRing} rotation={[1.25, 0.15, 0]}>
+        <torusGeometry args={[1.34, 0.006, 6, 128]} />
+        <meshBasicMaterial ref={haloMat} color={look.color} transparent opacity={0.22} depthWrite={false} />
+      </mesh>
+
       <group ref={tilt}>
         {/* inner core of light */}
         <mesh scale={0.6}>
@@ -113,21 +173,28 @@ function Bag({ state }: { state: AgentState }) {
           <meshPhysicalMaterial
             ref={bodyMat}
             color="#0e1f47"
-            roughness={0.1}
+            roughness={0.08}
             metalness={0.1}
             clearcoat={1}
-            clearcoatRoughness={0.05}
+            clearcoatRoughness={0.04}
             transparent
             opacity={0.78}
             emissive={look.color}
             emissiveIntensity={0.22}
           />
         </mesh>
-        {/* fresnel rim: the "glass" edge glow, one cheap draw call */}
+        {/* fresnel rim: the glass edge glow */}
         <mesh scale={1.005}>
           <sphereGeometry args={[1, 48, 48]} />
           <shaderMaterial ref={rimMat} args={[rimShader]} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
         </mesh>
+        {/* glass highlight: a soft specular glint upper-left */}
+        <sprite position={[-0.42, 0.5, 0.78]} scale={[0.46, 0.26, 1]}>
+          <spriteMaterial map={glowTexture} color="#ffffff" transparent opacity={0.55} depthWrite={false} blending={THREE.AdditiveBlending} rotation={0.6} />
+        </sprite>
+        <sprite position={[0.5, -0.52, 0.7]} scale={[0.12, 0.12, 1]}>
+          <spriteMaterial map={glowTexture} color="#ffffff" transparent opacity={0.35} depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
         {/* face of light */}
         <group position={[0, 0.02, 0.93]}>
           <group ref={eyes}>
@@ -141,7 +208,9 @@ function Bag({ state }: { state: AgentState }) {
           <Mouth kind={look.mouth} />
         </group>
       </group>
-      <group ref={rings} rotation={[1.2, 0.2, 0]}>
+
+      {/* scanning rings */}
+      <group ref={scanRings} rotation={[1.2, 0.2, 0]}>
         {[1.26, 1.4].map((r, i) => (
           <mesh key={r} rotation={[i * 0.5, i * 0.7, 0]}>
             <torusGeometry args={[r, 0.012, 8, 96]} />
@@ -165,7 +234,7 @@ function Mouth({ kind }: { kind: "smile" | "flat" | "o" | "soft" }) {
   if (kind === "flat")
     return (
       <mesh position={[0, -0.2, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <capsuleGeometry args={[0.03, 0.22, 4, 8]} />
+        <capsuleGeometry args={[0.034, 0.22, 4, 8]} />
         {mat}
       </mesh>
     );
@@ -183,6 +252,52 @@ function Mouth({ kind }: { kind: "smile" | "flat" | "o" | "soft" }) {
       {mat}
     </mesh>
   );
+}
+
+/** Particles on a loose shell around Bag; drift is computed in the vertex shader. */
+function makeParticles(count: number, color: string) {
+  const pos = new Float32Array(count * 3);
+  const seed = new Float32Array(count * 2);
+  // deterministic pseudo-random so the layout is stable between renders
+  let s = 7;
+  const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < count; i++) {
+    const r = 1.18 + rnd() * 0.36;
+    const theta = rnd() * Math.PI * 2;
+    const y = (rnd() * 2 - 1) * 0.9;
+    pos.set([Math.cos(theta) * r, y, Math.sin(theta) * r], i * 3);
+    seed.set([0.15 + rnd() * 0.35, rnd() * Math.PI * 2], i * 2);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geometry.setAttribute("aSeed", new THREE.BufferAttribute(seed, 2));
+  const shader = {
+    uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(color) }, uSpeed: { value: 1 } },
+    vertexShader: /* glsl */ `
+      uniform float uTime;
+      uniform float uSpeed;
+      attribute vec2 aSeed;
+      varying float vAlpha;
+      void main() {
+        float a = uTime * aSeed.x * 0.35 * uSpeed + aSeed.y;
+        float c = cos(a), s = sin(a);
+        vec3 p = vec3(position.x * c - position.z * s, position.y + sin(uTime * 0.6 + aSeed.y) * 0.08, position.x * s + position.z * c);
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        // fade particles that pass behind the orb
+        vAlpha = smoothstep(-1.2, 0.4, p.z) * (0.55 + 0.45 * sin(uTime * 1.3 + aSeed.y * 3.0));
+        gl_PointSize = (2.0 + aSeed.x * 6.0) * (4.8 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      varying float vAlpha;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.0, d) * vAlpha;
+        gl_FragColor = vec4(mix(uColor, vec3(1.0), 0.35) * a, a);
+      }`,
+  };
+  return { geometry, shader };
 }
 
 function makeRimShader(color: string) {
