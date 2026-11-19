@@ -18,7 +18,7 @@ export const MapEntry = z.looseObject({
   first_historical_data: str,
   last_historical_data: str,
   platform: z
-    .looseObject({ id: num, name: str, symbol: str, slug: str, token_address: str })
+    .looseObject({ id: z.union([z.number(), z.string()]).nullable().optional(), name: str, symbol: str, slug: str, token_address: str })
     .nullable()
     .optional(),
 });
@@ -48,8 +48,9 @@ export const CoinInfo = z.looseObject({
       source_code: z.array(z.string()).optional(),
     })
     .optional(),
+  // `platform.id` comes back as a string ("1027") from /v2/cryptocurrency/info
   platform: z
-    .looseObject({ id: num, name: str, slug: str, symbol: str, token_address: str })
+    .looseObject({ id: z.union([z.number(), z.string()]).nullable().optional(), name: str, slug: str, symbol: str, token_address: str })
     .nullable()
     .optional(),
   contract_address: z
@@ -79,6 +80,19 @@ export const UsdQuote = z.looseObject({
 });
 export type UsdQuote = z.infer<typeof UsdQuote>;
 
+/**
+ * v3 returns `quote` as an array of `{ symbol: "USD", ... }` (despite the docs
+ * showing an object), v2 as `{ USD: {...} }`. Normalise both to a record.
+ */
+export function normalizeQuoteField(q: unknown): unknown {
+  if (!Array.isArray(q)) return q;
+  const out: Record<string, unknown> = {};
+  for (const item of q) {
+    if (item && typeof item === "object" && "symbol" in item) out[String((item as { symbol: unknown }).symbol)] = item;
+  }
+  return out;
+}
+
 export const CoinQuote = z.looseObject({
   id: z.number(),
   name: z.string(),
@@ -94,7 +108,7 @@ export const CoinQuote = z.looseObject({
   self_reported_circulating_supply: num,
   self_reported_market_cap: num,
   last_updated: str,
-  quote: z.record(z.string(), UsdQuote),
+  quote: z.preprocess(normalizeQuoteField, z.record(z.string(), UsdQuote)),
 });
 export type CoinQuote = z.infer<typeof CoinQuote>;
 

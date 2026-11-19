@@ -48,6 +48,8 @@ export class CmcError extends Error {
 interface CmcStatusLike {
   error_code?: number | string | null;
   error_message?: string | null;
+  /** Newer endpoints (v5) add a precise reason, e.g. "interval must be one of [...]". */
+  error_detail?: string | null;
 }
 
 /** Map an HTTP status + CMC status object to an error kind. Returns null on success. */
@@ -57,11 +59,14 @@ export function classifyCmcResponse(
 ): { kind: CmcErrorKind; code?: number; message: string } | null {
   const rawCode = status?.error_code;
   const code = rawCode === null || rawCode === undefined || rawCode === "" ? 0 : Number(rawCode);
-  const message = status?.error_message || `HTTP ${httpStatus}`;
+  const base = status?.error_message || `HTTP ${httpStatus}`;
+  const message = status?.error_detail ? `${base} ${status.error_detail}` : base;
 
   if (httpStatus >= 200 && httpStatus < 300 && (!code || Number.isNaN(code))) return null;
 
   switch (code) {
+    case 4001: // v5 validation error
+      return { kind: "bad_request", code, message };
     case 1006:
       return { kind: "plan_blocked", code, message };
     case 1008:

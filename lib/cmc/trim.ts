@@ -10,7 +10,8 @@ export interface TrimOptions {
   maxKeys?: number;
 }
 
-const SECRET_KEY_RE = /(api[_-]?key|token|secret|authorization|password)/i;
+// Exact key names only: a loose /token/ match would hide useful public fields like `token_address`.
+const SECRET_KEY_RE = /^(x-cmc_pro_api_key|api[_-]?key|access[_-]?token|token|secret|authorization|password)$/i;
 
 export function trimJson(value: unknown, opts: TrimOptions = {}, depth = 0): unknown {
   const { maxArray = 3, maxString = 160, maxDepth = 6, maxKeys = 40 } = opts;

@@ -50,7 +50,8 @@ export const ENDPOINTS = {
   marketPairs: {
     path: "/v2/cryptocurrency/market-pairs/latest",
     method: "GET",
-    minPlan: "basic",
+    // Docs say "Basic and up", but a live Basic key gets 1006 (observed 19 Nov 2026).
+    minPlan: "builder",
     ttl: 120,
     purpose: "Where it trades: volume share per exchange, liquidity per pair",
   },
@@ -64,7 +65,8 @@ export const ENDPOINTS = {
   pricePerformance: {
     path: "/v2/cryptocurrency/price-performance-stats/latest",
     method: "GET",
-    minPlan: "basic",
+    // Docs say "Basic and up", but a live Basic key gets 1006 (observed 19 Nov 2026).
+    minPlan: "builder",
     ttl: 300,
     purpose: "Price change over 24h / 7d / 30d / 90d",
   },

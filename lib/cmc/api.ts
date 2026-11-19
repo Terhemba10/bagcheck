@@ -90,8 +90,9 @@ export function rankMatches(coins: CoinRef[], query: string, limit = 8): CoinRef
     const sym = c.symbol.toLowerCase();
     const name = c.name.toLowerCase();
     let s = 0;
-    if (sym === q) s = 100;
-    else if (c.slug === q || name === q) s = 90;
+    // Exact slug/name beats exact symbol: "bitcoin" must find Bitcoin, not a token whose ticker is BITCOIN.
+    if (c.slug === q || name === q) s = 100;
+    else if (sym === q) s = 90;
     else if (name.startsWith(q)) s = 60;
     else if (sym.startsWith(q)) s = 50;
     else if (name.includes(q)) s = 30;
@@ -170,9 +171,40 @@ export async function getPricePerformance(ids: number[]): Promise<Sourced<unknow
   return sourced(r, flattenData(r.data));
 }
 
-export async function getDailyHistory(id: number, days = 90): Promise<Sourced<unknown>> {
-  const r = await cmcRequest("ohlcvHistorical", { id, interval: "1d", count: days, convert: "USD" });
-  return sourced(r, r.data);
+export interface Candle {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  marketCap: number;
+  timeOpen: string;
+  timeClose: string;
+}
+
+/** v5 returns each candle as a 10-value array. Pure, unit-tested. */
+export function parseCandles(data: unknown): Candle[] {
+  if (!Array.isArray(data)) return [];
+  const out: Candle[] = [];
+  for (const row of data) {
+    if (!Array.isArray(row) || row.length < 10) continue;
+    const [open, high, low, close, volume, marketCap, timeOpen, , , timeClose] = row;
+    if ([open, high, low, close].some((v) => typeof v !== "number")) continue;
+    out.push({
+      open, high, low, close,
+      volume: Number(volume) || 0,
+      marketCap: Number(marketCap) || 0,
+      timeOpen: String(timeOpen),
+      timeClose: String(timeClose),
+    });
+  }
+  return out;
+}
+
+/** Daily candles. Note: v5 rejects `convert` (USD only). */
+export async function getDailyHistory(id: number, days = 90): Promise<Sourced<Candle[]>> {
+  const r = await cmcRequest("ohlcvHistorical", { id, interval: "1d", count: days });
+  return sourced(r, parseCandles(r.data));
 }
 
 export async function getTrending(): Promise<Sourced<unknown[]>> {

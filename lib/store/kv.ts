@@ -67,11 +67,17 @@ class UpstashKV implements KV {
 
 let instance: KV | null = null;
 
+// Next.js can load this module more than once per process (pages and route
+// handlers are bundled separately), so the in-memory store lives on globalThis
+// to keep one shared copy.
+const g = globalThis as unknown as { __bagcheckMemoryKV?: MemoryKV };
+
 export function kv(): KV {
   if (instance) return instance;
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  instance = url && token ? new UpstashKV(new Redis({ url, token })) : new MemoryKV();
+  if (url && token) instance = new UpstashKV(new Redis({ url, token }));
+  else instance = g.__bagcheckMemoryKV ??= new MemoryKV();
   return instance;
 }
 

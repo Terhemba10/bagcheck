@@ -43,7 +43,12 @@ export default async function EvidencePage() {
           value={month?.credits_left != null ? month.credits_left.toLocaleString("en-US") : "—"}
           hint={s.keyInfo?.plan.credit_limit_monthly ? `of ${s.keyInfo.plan.credit_limit_monthly.toLocaleString("en-US")}` : undefined}
         />
-        <Stat label="Credits left today" value={day?.credits_left != null ? day.credits_left.toLocaleString("en-US") : "—"} />
+        {day?.credits_left != null ? (
+          <Stat label="Credits left today" value={day.credits_left.toLocaleString("en-US")} />
+        ) : (
+          // Basic keys report only credits used today (no daily limit given)
+          <Stat label="Credits used today" value={day?.credits_used != null ? day.credits_used.toLocaleString("en-US") : "—"} />
+        )}
         <Stat
           label="Watchlist monitoring"
           value={MODE_LABEL[s.governor.mode]}
