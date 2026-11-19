@@ -52,6 +52,13 @@ export const ENDPOINTS = {
     ttl: 60,
     purpose: "Fallback for quotes if v3 is unavailable",
   },
+  listings: {
+    path: "/v3/cryptocurrency/listings/latest",
+    method: "GET",
+    minPlan: "basic",
+    ttl: 3600,
+    purpose: "Home: top movers with warning signs (Basic fallback for trending)",
+  },
   marketPairs: {
     path: "/v2/cryptocurrency/market-pairs/latest",
     method: "GET",

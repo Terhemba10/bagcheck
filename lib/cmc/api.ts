@@ -212,6 +212,12 @@ export async function getTrending(): Promise<Sourced<unknown[]>> {
   return sourced(r, flattenData(r.data));
 }
 
+/** Top coins by market cap with quotes (1 credit per 250). Used for "worth a check" on Basic. */
+export async function getListings(limit = 200): Promise<Sourced<CoinQuote[]>> {
+  const r = await cmcRequest("listings", { start: 1, limit, convert: "USD" });
+  return sourced(r, parseEach(CoinQuote, flattenData(r.data), "listing"));
+}
+
 // ─── DEX (contract tokens) ───────────────────────────────────────────────────
 
 export async function getDexSecurity(platformName: string, address: string): Promise<Sourced<unknown>> {

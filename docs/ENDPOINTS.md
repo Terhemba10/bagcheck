@@ -11,6 +11,7 @@ Legend: ✅ works on this key · ⛔ `1006` plan not authorized · ⚠️ reacha
 | `GET /v2/cryptocurrency/info` | ✅ | 1 | Official website, whitepaper, socials, explorers, `date_added`, `date_launched`, contract addresses per chain; lookup by contract address |
 | `GET /v3/cryptocurrency/quotes/latest` | ✅ | 1 (batched ids) | Price, 24 h volume, market cap, **fully diluted value**, circulating / total / max supply, `num_market_pairs`, % change 1 h → 90 d, CEX vs DEX volume |
 | `GET /v2/cryptocurrency/quotes/latest` | (fallback) | — | Used only if v3 fails |
+| `GET /v3/cryptocurrency/listings/latest` | ✅ (checked 19 Nov) | 1 per 250 | Home "coins worth a check" on Basic: top 200 by market cap, filtered by our warning-sign rules (`lib/core/worthACheck.ts`). Same shape as v3 quotes (`quote` is an array) |
 | `GET /v1/global-metrics/quotes/latest` | ✅ | 1 | Market context: total market cap and its change vs yesterday, BTC dominance |
 | `GET /v5/cryptocurrency/ohlcv/historical` | ✅ | 1 per ≤100 candles | Daily price / volume / market-cap history for health trends and "Lessons" |
 | `GET /v1/dex/security/detail` | ✅ | 1 | Contract warning signs: security level, buy/sell tax, blacklist / whitelist / mint / proxy checks, honeypot & fake-token status |

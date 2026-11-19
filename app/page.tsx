@@ -3,6 +3,7 @@ import { Agent } from "@/components/agent/Agent";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { IconArrowRight, IconBell, IconLifebuoy, IconSearch } from "@/components/ui/icons";
 import { SearchBar } from "@/components/ui/SearchBar";
+import { WorthACheckRow } from "@/components/WorthACheckRow";
 
 const STAGES = [
   {
@@ -36,8 +37,8 @@ const STAGES = [
 export default function Home() {
   return (
     <div className="space-y-20">
-      <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]" aria-labelledby="hero-title">
-        <div className="order-2 space-y-8 lg:order-1">
+      <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-start" aria-labelledby="hero-title">
+        <div className="order-2 space-y-8 lg:order-1 lg:pt-16">
           <div className="space-y-4">
             <h1 id="hero-title" className="text-[40px] leading-[44px] font-semibold tracking-tight text-balance sm:text-[56px] sm:leading-[60px]">
               Did the founders keep their promises, and can you still get out?
@@ -51,9 +52,13 @@ export default function Home() {
             <SearchBar examples />
           </div>
         </div>
-        <div className="order-1 flex justify-center lg:order-2">
+        <div className="order-1 flex flex-col items-center gap-8 lg:order-2">
           <Agent state="idle" size={360} reactToTyping />
+          {/* desktop: fills the space under Bag */}
+          <WorthACheckRow className="hidden lg:block" />
         </div>
+        {/* phones/tablets: after the search */}
+        <WorthACheckRow className="order-3 lg:hidden" />
       </section>
 
       <section aria-labelledby="stages-title" className="space-y-6">
