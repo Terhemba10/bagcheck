@@ -28,9 +28,10 @@
   - Web: Watch button on reports, `/watchlist`, `/alerts/[id]` (before/after chart, meaning, next steps, mark delivered), `/connect`.
   - `/api/admin/test-alert?coinId=` (Bearer CRON_SECRET) sends a clearly labelled [Test] alert for demos.
 
+- **Phase e (rescue plan):** `/rescue` (any coin via search + general steps) and `/rescue/[id]` (`/api/rescue/[id]`, `lib/rescue/*`): recovery-scam shield at the top; "Can I still sell?" (DEX pools by our token's side, CEX markets when the plan allows, price-impact ESTIMATE from a 50/50 pool model, thin-liquidity fact); protect-your-wallet steps with the fake-revoke warning above them; official links from a hard-coded allowlist (`lib/rescue/links.ts`, verified 19–20 Nov); evidence summary built and downloaded in the browser with the secret blocker on every field; where to report (exchange, IC3, local police cybercrime unit); lessons from snapshots/alerts only. Bot `/rescue [coin]` links to the same page. Guard test scans the rescue copy for advice wording and non-allowlisted links.
+
 ## Next (in order)
-1. Phase e: rescue plan (`/rescue/[id]`: can I still sell, protect wallet, evidence pack, scam shield, lessons).
-2. Phases f–h per `docs/PLAN.md`: MCP server, tests/CI/docs, video + submission. Before 9 Dec: demo snapshots (PLAN §1b).
+1. Phases f–h per `docs/PLAN.md`: MCP server, tests/CI/docs, video + submission. Before 9 Dec: demo snapshots (PLAN §1b).
 
 ## Known polish items
 - Amber (concern) state: the bloomed core lowers the face's contrast on High quality.

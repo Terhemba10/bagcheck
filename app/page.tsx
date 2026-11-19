@@ -26,9 +26,8 @@ const STAGES = [
     Icon: IconLifebuoy,
     title: "If it went wrong",
     body: "Can you still sell? Protect what's left, gather evidence, and avoid recovery scammers.",
-    cta: "Coming soon",
+    cta: "Open rescue plan",
     href: "/rescue",
-    soon: true,
     tone: "text-rescue",
   },
 ];

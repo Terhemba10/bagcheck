@@ -67,6 +67,7 @@ export default async function AlertPage({ params }: { params: Promise<{ id: stri
         {quote && <MarkDelivered coinId={a.coinId} quote={quote} />}
         <div className="flex flex-wrap gap-4 pt-2 text-sm">
           <Link href={`/coin/${a.coinId}`} className="text-teal hover:underline">Open today&apos;s report →</Link>
+          <Link href={`/rescue/${a.coinId}`} className="text-rescue hover:underline">Rescue plan for {a.coinSymbol}</Link>
           <Link href="/watchlist" className="text-teal hover:underline">Back to your watchlist</Link>
         </div>
       </GlassCard>

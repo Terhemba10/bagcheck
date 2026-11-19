@@ -104,6 +104,11 @@ export function ReportView({ id }: { id: number }) {
           )}
         </div>
         {r ? <WatchButton coinId={r.coin.id} name={r.coin.name} /> : null}
+        {r && (
+          <a href={`/rescue/${r.coin.id}`} className="flex min-h-11 items-center justify-center gap-2 rounded-md text-sm text-rescue hover:bg-rescue-soft">
+            Something went wrong? Open the rescue plan →
+          </a>
+        )}
         <Disclaimer />
       </aside>
 

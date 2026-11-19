@@ -33,9 +33,12 @@ export function SearchBar({
   size = "lg",
   autoFocus,
   examples = false,
+  target = "coin",
 }: {
   size?: "lg" | "md";
   autoFocus?: boolean;
+  /** Which page a result opens: the report or the rescue plan. */
+  target?: "coin" | "rescue";
   /** Show "Try: PEPE · SUI · paste a contract" chips. */
   examples?: boolean;
 }) {
@@ -81,7 +84,7 @@ export function SearchBar({
 
   const go = (r: Result) => {
     setOpen(false);
-    router.push(`/coin/${r.id}`);
+    router.push(`/${target}/${r.id}`);
   };
 
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { escapeHtml, formatAlert } from "@/lib/telegram/api";
-import { HELP_TEXT, parseCommand, RESCUE_TEXT } from "@/lib/telegram/commands";
+import { HELP_TEXT, parseCommand, RESCUE_TEXT, rescueText } from "@/lib/telegram/commands";
 import type { Alert } from "@/lib/monitor/store";
 
 describe("parseCommand", () => {
@@ -50,8 +50,12 @@ describe("messages", () => {
     expect(t).toContain("/alerts/1-abc");
     expect(t).toContain("/coin/24478");
   });
-  it("the rescue text warns about recovery scams and fake revoke sites", () => {
-    expect(RESCUE_TEXT).toMatch(/guarantees recovery for an upfront fee/);
+  it("the rescue text uses the exact shield wording and warns about fake revoke sites", () => {
+    expect(RESCUE_TEXT).toContain("Anyone who guarantees to recover your crypto for an upfront fee is running a scam. Real authorities never charge recovery fees.");
     expect(RESCUE_TEXT).toMatch(/fake "revoke" sites/);
+    expect(RESCUE_TEXT).toContain('href="https://bagcheck-azure.vercel.app/rescue"');
+  });
+  it("/rescue <coin> links to that coin's rescue page", () => {
+    expect(rescueText({ id: 24478, name: "Pepe" })).toContain("https://bagcheck-azure.vercel.app/rescue/24478");
   });
 });

@@ -61,6 +61,7 @@ export function dexPlatformName(p: { slug?: string | null; name?: string | null 
   if (s.includes("solana")) return "solana";
   if (s.includes("base")) return "base";
   if (s.includes("arbitrum")) return "arbitrum";
+  if (s.includes("optimism") || s.includes("op mainnet")) return "optimism";
   if (s.includes("polygon")) return "polygon";
   if (s.includes("avalanche")) return "avalanche";
   if (s.includes("tron")) return "tron";

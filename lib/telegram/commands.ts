@@ -3,6 +3,7 @@
  */
 import type { Level } from "@/components/ui/status";
 import type { Report } from "@/lib/core/report";
+import { REVOKE_CHECKERS, SCAM_SHIELD } from "@/lib/rescue/links";
 import { DISCLAIMER_TG, escapeHtml, SITE_URL } from "./api";
 
 export type Command = "start" | "help" | "check" | "watch" | "unwatch" | "list" | "rescue" | "stop" | "unknown";
@@ -68,16 +69,23 @@ function order(l: Level) {
   return { danger: 4, concern: 3, watch: 2, ok: 1, unknown: 0, rescue: 0 }[l];
 }
 
-export const RESCUE_TEXT = [
-  "<b>⛨ If something went wrong, start here.</b>",
-  "",
-  "<b>1. Never pay anyone to \"recover\" crypto.</b> Anyone who guarantees recovery for an upfront fee is running a scam. Real authorities never charge recovery fees.",
-  "<b>2. If your wallet was drained or you approved a bad site:</b> revoke token approvals using only your wallet's own settings or the official explorer (e.g. etherscan.io/tokenapprovalchecker). Scammers make fake \"revoke\" sites.",
-  "<b>3. Move what's left</b> to a <b>new</b> wallet with a <b>new</b> seed phrase. Revoking stops future drains but doesn't return stolen funds.",
-  "<b>4. Keep evidence:</b> transaction hashes, dates, screenshots, and the site or contact involved.",
-  "<b>5. Report it:</b> to the exchange you used, ic3.gov (US) or your local police cybercrime unit.",
-  "",
-  "The full rescue plan (where you can still sell, an evidence pack) is coming to the website soon.",
-  "",
-  `<i>${DISCLAIMER_TG}</i>`,
-].join("\n");
+/** /rescue reply: the essentials, then a link to the full plan (for a coin, or the general page). */
+export function rescueText(coin?: { id: number; name: string } | null): string {
+  const link = coin ? `${SITE_URL}/rescue/${coin.id}` : `${SITE_URL}/rescue`;
+  return [
+    `<b>⛨ ${coin ? `Rescue plan for ${escapeHtml(coin.name)}` : "If something went wrong, start here."}</b>`,
+    "",
+    `<b>Recovery-scam shield:</b> ${escapeHtml(SCAM_SHIELD)}`,
+    "",
+    "<b>1. Can I still sell?</b> The full plan shows where it trades now and an estimate of price impact for your amount.",
+    `<b>2. Wallet drained or approved a bad site?</b> Revoke approvals only in your wallet or the chain's own explorer (e.g. ${REVOKE_CHECKERS.ethereum!.url}). Scammers make fake "revoke" sites. Revoking stops future drains but doesn't return stolen funds.`,
+    "<b>3. Move what's left</b> to a <b>new</b> wallet with a <b>new</b> seed phrase.",
+    "<b>4. Keep evidence</b> (transaction hashes, dates, screenshots) and <b>report it</b>: the exchange you used, ic3.gov (US), or your local police cybercrime unit.",
+    "",
+    `<a href="${link}">Open the full rescue plan</a>`,
+    "",
+    `<i>${DISCLAIMER_TG}</i>`,
+  ].join("\n");
+}
+
+export const RESCUE_TEXT = rescueText(null);

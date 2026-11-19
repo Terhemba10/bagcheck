@@ -16,7 +16,7 @@ import {
 import { detectSecret } from "@/lib/safety/secrets";
 import { kv } from "@/lib/store/kv";
 import { BOT_USERNAME, escapeHtml, sendMessage, SITE_URL, tg } from "@/lib/telegram/api";
-import { HELP_TEXT, parseCommand, reportText, RESCUE_TEXT } from "@/lib/telegram/commands";
+import { HELP_TEXT, parseCommand, reportText, RESCUE_TEXT, rescueText } from "@/lib/telegram/commands";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -141,9 +141,16 @@ export async function POST(req: Request) {
         );
         break;
       }
-      case "rescue":
-        await sendMessage(chatId, RESCUE_TEXT);
+      case "rescue": {
+        // with a coin: link to that coin's rescue page (search costs 0 credits)
+        const coin = arg ? (await searchCoins(arg))[0] ?? null : null;
+        if (arg && !coin) {
+          await sendMessage(chatId, `I couldn't find “${escapeHtml(arg)}”. Here's the general rescue plan:\n\n${RESCUE_TEXT}`);
+          break;
+        }
+        await sendMessage(chatId, rescueText(coin));
         break;
+      }
       case "stop":
         await unlinkChat(chatId);
         for (const c of await getWatchlist(`tg:${chatId}`)) await removeWatch(`tg:${chatId}`, c.id);
