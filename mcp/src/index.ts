@@ -192,7 +192,7 @@ server.registerTool(
         for (const p of r.sell.pools.slice(0, 5)) lines.push(`- ${p.dex} ${p.pair}: ${money(p.tokenSideUsd)} of ${r.coin.symbol}, 24h volume ${money(p.volume24h)}`);
         if (r.sell.otherPools.length) lines.push(`(${r.sell.otherPools.length} other pools are paired with small tokens and not counted.)`);
       } else lines.push(r.chain ? "No DEX pools paired with a major asset were found." : `${r.coin.name} trades on exchanges, not in DEX pools.`);
-      if (r.sell.cex.status === "plan") lines.push("Exchange-by-exchange depth needs a paid CoinMarketCap plan, so it isn't included.");
+      if (r.sell.cex.status === "plan") lines.push("Exchange-by-exchange depth needs a higher CoinMarketCap plan (Standard), so it isn't included.");
       if (amount_usd && r.sell.pools.length) {
         const e = estimateImpact(amount_usd, r.sell.pools);
         lines.push(

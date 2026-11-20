@@ -82,7 +82,7 @@ export function AgentActivity({ steps, elapsedMs, className }: { steps: StepStat
 
 function StepIcon({ status }: { status: StepStatus }) {
   const base = "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full";
-  const label = { pending: "Pending", running: "Running", done: "Done", skipped: "Skipped", blocked: "Needs a paid plan", failed: "No data" }[status];
+  const label = { pending: "Pending", running: "Running", done: "Done", skipped: "Skipped", blocked: "Needs a higher CMC plan", failed: "No data" }[status];
   return (
     <span className={cn(base, "relative")} role="img" aria-label={label}>
       <AnimatePresence mode="wait" initial={false}>

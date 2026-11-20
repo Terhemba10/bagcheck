@@ -112,7 +112,7 @@ export function SellSection({ r }: { r: Rescue }) {
         ) : (
           <p className="text-sm text-muted">
             {r.sell.cex.status === "plan"
-              ? "Exchange-by-exchange depth needs a paid CoinMarketCap plan, so it isn't shown live. If you hold this coin on an exchange, its order book shows how much can be sold near the current price."
+              ? "Exchange-by-exchange depth needs a higher CoinMarketCap plan (Standard), so it isn't shown live. If you hold this coin on an exchange, its order book shows how much can be sold near the current price."
               : "Exchange data isn't available right now."}
           </p>
         )}

@@ -7,7 +7,7 @@ import { IconArchive, IconClock, IconLive, IconLock, IconRecord } from "./icons"
  *  cached    fresh cache hit (with age)
  *  saved     last good copy, served because CMC refused (rate limit / credits)
  *  recorded  recorded demo from a paid plan (with date)
- *  paid-plan not available on the current CMC plan
+ *  paid-plan not available on the current CMC plan (needs a higher one; `plan` names the tier when known)
  */
 export type SourceKind = "live" | "cached" | "saved" | "recorded" | "paid-plan";
 
@@ -15,10 +15,13 @@ export function SourceTag({
   kind,
   at,
   when: whenOverride,
+  plan,
   className,
 }: {
   kind: SourceKind;
   at?: string;
+  /** For "paid-plan": the tier needed, when known ("Standard"). */
+  plan?: string;
   /** Pre-formatted age ("4 min ago"); skips the clock-based calculation. */
   when?: string;
   className?: string;
@@ -29,7 +32,7 @@ export function SourceTag({
     cached: { Icon: IconClock, text: `CoinMarketCap · ${when || "cached"}`, cls: "text-muted" },
     saved: { Icon: IconArchive, text: `Saved copy · ${when || "older data"}`, cls: "text-warn" },
     recorded: { Icon: IconRecord, text: `Recorded from the live CMC API${when ? ` on ${when}` : ""}`, cls: "text-info" },
-    "paid-plan": { Icon: IconLock, text: "Needs a paid CMC plan", cls: "text-faint" },
+    "paid-plan": { Icon: IconLock, text: `Needs a higher CMC plan${plan ? ` (${plan})` : ""}`, cls: "text-faint" },
   }[kind];
   return (
     <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", map.cls, className)}>

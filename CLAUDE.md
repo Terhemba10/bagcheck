@@ -33,7 +33,7 @@ npx tsc --noEmit        # typecheck
 npx eslint .            # lint
 npm run build           # production build
 npm run screens         # Playwright screenshots 1440/1024/390 → design/screens (needs a running server; BASE_URL=…)
-npx tsx scripts/check-search-hero.ts      # dropdown + hero regression check (BASE_URL=…)
+npx tsx scripts/check-search.ts           # dropdown + one-click chips check (BASE_URL=…)
 npx tsx scripts/check-shell.ts            # shell keyboard/interaction checks + fps in real Chrome (BASE_URL=…)
 npx tsx --env-file=.env.local --conditions=react-server scripts/plan-upgrade.ts  # after a CMC plan change: re-probe + demo snapshots
 npm run evidence:export # docs/API_EVIDENCE.md from a running server

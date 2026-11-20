@@ -13,6 +13,8 @@ import {
   searchCoins,
 } from "@/lib/cmc/api";
 import { CmcError } from "@/lib/cmc/errors";
+import { ENDPOINTS, type EndpointKey } from "@/lib/cmc/endpoints";
+import { kv } from "@/lib/store/kv";
 import { isAuthorized } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
@@ -23,10 +25,27 @@ export const maxDuration = 60;
  * plan access and fill the evidence log. Protected by CRON_SECRET.
  *
  *   POST /api/admin/probe?q=pepe
+ *   POST /api/admin/probe?reset=marketPairs   forget a stored plan status (e.g. after a plan
+ *     change) and re-test that endpoint now with one small call
  */
 export async function POST(req: Request) {
   if (!isAuthorized(req)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  const q = new URL(req.url).searchParams.get("q") ?? "bitcoin";
+  const params = new URL(req.url).searchParams;
+  const reset = params.get("reset");
+  if (reset) {
+    if (!(reset in ENDPOINTS)) return NextResponse.json({ error: "unknown endpoint" }, { status: 400 });
+    const key = `cmc:cap:${reset as EndpointKey}`;
+    const before = await kv().get(key);
+    await kv().del(key);
+    let retest: unknown;
+    try {
+      retest = reset === "marketPairs" ? { ok: true, sample: summarize(await getMarketPairs(1, 5)) } : { skipped: "re-test only implemented for marketPairs" };
+    } catch (e) {
+      retest = { ok: false, error: e instanceof CmcError ? { kind: e.kind, code: e.code } : String(e) };
+    }
+    return NextResponse.json({ endpoint: reset, before, after: await kv().get(key), retest });
+  }
+  const q = params.get("q") ?? "bitcoin";
 
   const results: Record<string, unknown> = {};
   const run = async (name: string, fn: () => Promise<unknown>) => {

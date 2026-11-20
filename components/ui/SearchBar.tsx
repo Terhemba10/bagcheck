@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
@@ -187,25 +188,31 @@ export function SearchBar({
         // hidden (not removed) while results are open, so the page below does not jump
         <p aria-hidden={showList || undefined} className={cn("mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-muted", showList && "invisible")}>
           <span className="text-faint">Try</span>
+          {/* coin chips open the report directly (one click: the agent starts working on arrival) */}
           {[
-            { label: "PEPE", value: "pepe" },
-            { label: "SUI", value: "sui" },
-            { label: "paste a contract", value: EXAMPLE_CONTRACT },
-          ].map((ex, i) => (
-            <span key={ex.label} className="inline-flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery(ex.value);
-                  inputRef.current?.focus();
-                }}
-                className="min-h-9 rounded-full border border-line bg-surface-1 px-3.5 text-text transition-colors hover:border-teal/50 hover:bg-teal-soft"
-                aria-label={ex.value === EXAMPLE_CONTRACT ? "Try a contract address (Pepe on Ethereum)" : `Try ${ex.label}`}
-              >
-                {ex.label}
-              </button>
-            </span>
+            { label: "PEPE", id: 24478, name: "Pepe" },
+            { label: "SUI", id: 20947, name: "Sui" },
+          ].map((ex) => (
+            <Link
+              key={ex.label}
+              href={`/${target}/${ex.id}`}
+              className="inline-flex min-h-9 items-center rounded-full border border-line bg-surface-1 px-3.5 text-text transition-colors hover:border-teal/50 hover:bg-teal-soft"
+              aria-label={`Check ${ex.name} (${ex.label})`}
+            >
+              {ex.label}
+            </Link>
           ))}
+          <button
+            type="button"
+            onClick={() => {
+              setQuery(EXAMPLE_CONTRACT);
+              inputRef.current?.focus();
+            }}
+            className="min-h-9 rounded-full border border-line bg-surface-1 px-3.5 text-text transition-colors hover:border-teal/50 hover:bg-teal-soft"
+            aria-label="Try a contract address (Pepe on Ethereum)"
+          >
+            paste a contract
+          </button>
         </p>
       )}
 

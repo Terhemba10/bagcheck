@@ -28,7 +28,7 @@ export const REPORT_STEPS: StepDef[] = [
 export interface StepState {
   id: StepId;
   status: StepStatus;
-  /** Short note: "live", "cached", "not a token", "needs a paid plan"… */
+  /** Short note: "live", "cached", "not a token", "needs a higher CMC plan"… */
   note?: string;
 }
 

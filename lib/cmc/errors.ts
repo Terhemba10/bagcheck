@@ -1,3 +1,4 @@
+import { higherPlan } from "./planLabel";
 import type { EndpointKey } from "./endpoints";
 
 export type CmcErrorKind =
@@ -27,7 +28,7 @@ export class CmcError extends Error {
   get userMessage(): string {
     switch (this.kind) {
       case "plan_blocked":
-        return "This data needs a paid CoinMarketCap plan, so it isn't available live right now.";
+        return `This data needs ${higherPlan(this.endpoint, true)}, so it isn't available live right now.`;
       case "rate_limited":
         return "CoinMarketCap is busy with our requests. Please try again in a minute.";
       case "credits_exhausted":

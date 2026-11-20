@@ -3,8 +3,9 @@
  * plain-English copy. Code decides; the AI only explains later.
  *
  * Every input is wrapped in `Avail<T>` so a signal can say *why* it has no
- * data (not a token, needs a paid plan, CMC error) instead of guessing.
+ * data (not a token, needs a higher CMC plan, CMC error) instead of guessing.
  */
+import { higherPlan, tierFor } from "@/lib/cmc/planLabel";
 import type { Level } from "@/components/ui/status";
 import type { SourceKind } from "@/components/ui/SourceTag";
 import type { CoinInfo, CoinQuote, MarketPairs } from "@/lib/cmc/types";
@@ -15,7 +16,7 @@ import { countsAsLiquidity } from "./pools";
 export type Avail<T> =
   | { status: "ok"; value: T; source: SourceKind; at?: string }
   | { status: "none"; reason: string } // not applicable (e.g. not a token)
-  | { status: "plan"; reason: string } // needs a paid CMC plan
+  | { status: "plan"; reason: string } // needs a higher CMC plan than this key
   | { status: "error"; reason: string }; // CMC/network problem
 
 export type SignalId = "dilution" | "volume" | "concentration" | "liquidity" | "momentum" | "links" | "contract";
@@ -28,7 +29,7 @@ export interface Signal {
   valueLabel?: string;
   meaning: string;
   why: string;
-  source: { kind: SourceKind; at?: string };
+  source: { kind: SourceKind; at?: string; plan?: string };
   /** true when the level was actually computed (counts towards the score) */
   scored: boolean;
   details?: Record<string, unknown>;
@@ -155,12 +156,12 @@ export function volumeSignal(q: Avail<CoinQuote>): Signal {
   return { id: "volume", title, level, value: r < 0.01 ? r.toFixed(4) : r.toFixed(2), valueLabel: "24h volume ÷ market cap", meaning, why, source: src(q), scored: true, details: { volume24h: vol, marketCap: mcap, ratio: r } };
 }
 
-// ─── 3. Trading concentration (Startup extra: market pairs) ───────────────────
+// ─── 3. Trading concentration (market pairs: needs CMC Standard) ───────────────────
 
 export function concentrationSignal(pairs: Avail<MarketPairs>): Signal {
   const title = "Exchange concentration";
   const why = "When most trading happens on one exchange, a single delisting or outage can trap holders.";
-  if (pairs.status === "plan") return unknown("concentration", title, "Exchange-by-exchange volume needs a paid CoinMarketCap plan, so it isn't checked live right now.", why, { kind: "paid-plan" });
+  if (pairs.status === "plan") return unknown("concentration", title, `Exchange-by-exchange volume needs ${higherPlan("marketPairs", true)}, so it isn't checked live right now.`, why, { kind: "paid-plan", plan: tierFor("marketPairs") });
   if (pairs.status !== "ok") return unknown("concentration", title, "We couldn't load where this coin trades.", why, src(pairs));
   const byExchange = new Map<string, number>();
   let total = 0;
@@ -195,7 +196,7 @@ export function liquiditySignal(pools: Avail<DexPool[]>, quote: Avail<CoinQuote>
   const title = "Liquidity";
   const why = "Liquidity is the money available to buy from you. If it's thin, selling even a small amount can drop the price.";
   if (pools.status === "none") {
-    return unknown("liquidity", title, `${pools.reason} Exchange order-book depth needs a paid CoinMarketCap plan.`, why, { kind: "paid-plan" });
+    return unknown("liquidity", title, `${pools.reason} Exchange order-book depth needs ${higherPlan("marketPairs", true)}.`, why, { kind: "paid-plan", plan: tierFor("marketPairs") });
   }
   if (pools.status !== "ok") return unknown("liquidity", title, "We couldn't load DEX pool liquidity.", why, src(pools));
   const symbol = ours.symbol ?? (quote.status === "ok" ? quote.value.symbol : null);

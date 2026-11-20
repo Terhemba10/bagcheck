@@ -46,7 +46,7 @@ export function StateView({
     empty: { t: title ?? "Nothing here yet", m: message ?? "Check a coin to get started.", agent: "idle" as const },
     error: { t: title ?? "Something went wrong on our side", m: message ?? "Your data is safe. Please try again.", agent: "medium" as const },
     "rate-limited": { t: title ?? "CoinMarketCap is busy", m: message ?? "We've hit the API's per-minute limit. Please try again in a minute.", agent: "idle" as const },
-    "plan-blocked": { t: title ?? "Needs a paid CoinMarketCap plan", m: message ?? "This part isn't available live on the current API plan.", agent: "idle" as const },
+    "plan-blocked": { t: title ?? "Needs a higher CoinMarketCap plan", m: message ?? "This part isn't available live on the current API plan.", agent: "idle" as const },
   }[kind];
 
   return (

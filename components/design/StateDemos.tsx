@@ -10,7 +10,7 @@ export function StateDemos() {
       <StateView kind="empty" message="Nothing watched yet. Check a coin and press Watch." />
       <StateView kind="error" onRetry={noop} />
       <StateView kind="rate-limited" onRetry={noop} retryAfterSeconds={60} />
-      <StateView kind="plan-blocked" message="Exchange-by-exchange liquidity needs a paid CMC plan. DEX liquidity is shown instead." />
+      <StateView kind="plan-blocked" message="Exchange-by-exchange liquidity needs a higher CMC plan (Standard). DEX liquidity is shown instead." />
     </div>
   );
 }

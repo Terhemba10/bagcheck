@@ -15,7 +15,7 @@ export interface SignalCardProps {
   meaning: string;
   /** Why it matters to a holder. */
   why: string;
-  source: { kind: SourceKind; at?: string; when?: string };
+  source: { kind: SourceKind; at?: string; when?: string; plan?: string };
 }
 
 export function SignalCard({ title, level, value, valueLabel, meaning, why, source }: SignalCardProps) {

@@ -24,3 +24,20 @@ export function compactCredits(n: number): string {
   if (n >= 10_000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
   return n.toLocaleString("en-US");
 }
+
+/**
+ * Which plan an endpoint needs when the current key gets 1006, for user-facing text.
+ * Market pairs still returns 1006 on the paid (450k-credit) key, so it needs Standard;
+ * for other endpoints we only know "higher than this key".
+ */
+const NEEDS: Partial<Record<string, string>> = { marketPairs: "Standard" };
+
+/** "a higher CMC plan (Standard)" / "a higher CMC plan". `long` spells out CoinMarketCap. */
+export function higherPlan(endpoint?: string, long = false): string {
+  const name = long ? "CoinMarketCap" : "CMC";
+  const tier = endpoint ? NEEDS[endpoint] : undefined;
+  return `a higher ${name} plan${tier ? ` (${tier})` : ""}`;
+}
+
+/** The tier name to show, if we know it. */
+export const tierFor = (endpoint?: string): string | undefined => (endpoint ? NEEDS[endpoint] : undefined);

@@ -1,7 +1,23 @@
 # API evidence
 
-Real CoinMarketCap API calls made by Bagcheck, exported 2026-11-19T15:55:23.534Z from http://localhost:3000/evidence.
+Real CoinMarketCap API calls made by Covex (then still called Bagcheck), exported 2026-11-19T15:55:23.534Z from http://localhost:3000/evidence.
 Responses are trimmed (arrays cut to 3 items). The API key is sent only as a server-side header and is never logged.
+
+## Re-tests after the plan upgrade (20 Nov 2026)
+
+On 20 Nov 2026 `/v1/key/info` reported a paid plan (450,000 credits/month, 600 calls/min). Each endpoint that was blocked on Basic was called once more with the same key:
+
+| Endpoint | Time (UTC) | HTTP | CMC status | Credits |
+|---|---|---|---|---|
+| `GET /v2/cryptocurrency/price-performance-stats/latest` (ids 1, 24478, 35336) | 2026-11-20T08:50:26Z | 200 | `0` | 1 |
+| `GET /v1/cryptocurrency/trending/gainers-losers` | 2026-11-20T08:50:27Z | 200 | `0` | 1 |
+| `GET /v1/cryptocurrency/trending/most-visited` | 2026-11-20T08:50:28Z | 200 | `0` | 1 |
+| `GET /v2/cryptocurrency/market-pairs/latest` (ids 1, 24478, 35336) | 2026-11-20T08:50Z | 403 | `1006` "Your API Key subscription plan doesn't support this endpoint." | 0 |
+| `GET /v2/cryptocurrency/market-pairs/latest` (ids 24478, 1; `limit=5`) | 2026-11-20T09:13Z | 403 | `1006` (same message) | 0 |
+
+Market pairs needs a higher plan than this key (Covex labels it "needs a higher CMC plan (Standard)"). The full responses of the three newly available endpoints are saved in [`data/demo/2026-11-20/`](../data/demo/2026-11-20/).
+
+## Original export (Basic key, 19 Nov 2026)
 
 | Endpoint | Time (UTC) | HTTP | Credits | CMC elapsed |
 |---|---|---|---|---|

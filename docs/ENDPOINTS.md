@@ -17,7 +17,7 @@ Legend: ✅ works on this key · ⛔ `1006` plan not authorized · ⚠️ reacha
 | `GET /v1/dex/security/detail` | ✅ | 1 | Contract warning signs: security level, buy/sell tax, blacklist / whitelist / mint / proxy checks, honeypot & fake-token status |
 | `GET /v1/dex/token/pools` | ✅ | 1 | DEX pools per token: liquidity in USD per side, 24 h volume, DEX name, pool age |
 | `GET /v1/key/info` | ✅ | 0 | Credit governor: credits left today / this month, rate limit |
-| `GET /v2/cryptocurrency/market-pairs/latest` | ⛔ 1006 | 0 | (Startup) CEX volume concentration, liquidity per market for "Can I still sell?" |
+| `GET /v2/cryptocurrency/market-pairs/latest` | ⛔ 1006 (also on the paid key, see below) | 0 | (Standard) CEX volume concentration, liquidity per market for "Can I still sell?" |
 | `GET /v2/cryptocurrency/price-performance-stats/latest` | ⛔ 1006 | 0 | (Startup) Not needed: quotes already include 1 h → 90 d changes |
 | `GET /v1/cryptocurrency/trending/gainers-losers` | ⛔ 1006 | 0 | (Startup) Home "coins worth a check" |
 | `GET /v1/cryptocurrency/trending/most-visited` | not called yet (Startup+ per docs) | — | Home "coins worth a check" |
@@ -32,7 +32,7 @@ Legend: ✅ works on this key · ⛔ `1006` plan not authorized · ⚠️ reacha
 | `GET /v1/cryptocurrency/trending/gainers-losers` | ✅ now available (home "coins worth a check" uses it, with the listings fallback kept) |
 | `GET /v1/cryptocurrency/trending/most-visited` | ✅ now available |
 | `GET /v2/cryptocurrency/price-performance-stats/latest` | ✅ now available (not used by a feature: quotes already carry 1 h → 90 d changes) |
-| `GET /v2/cryptocurrency/market-pairs/latest` | ⛔ still `1006` on this plan |
+| `GET /v2/cryptocurrency/market-pairs/latest` | ⛔ still `1006` on this plan (re-tested again 09:13 UTC: same). Covex says "needs a higher CMC plan (Standard)" on the card, the activity step and the API evidence page, so it doesn't contradict the "Paid plan" pill. The Exchange concentration signal stays "not enough data" until it answers |
 
 Demo snapshots of the newly available responses (Bitcoin, Pepe, OFFICIAL TRUMP; public market data only, no key) are saved in [`data/demo/2026-11-20/`](../data/demo/2026-11-20/) for the judging period, in case the key returns to Basic.
 

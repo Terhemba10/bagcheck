@@ -4,6 +4,7 @@ import { getDexPools, getDexSecurity, getInfo, getMarketPairs, getQuotes, type S
 import { CmcError } from "@/lib/cmc/errors";
 import type { CoinInfo, CoinQuote, MarketPairs } from "@/lib/cmc/types";
 import { checkProjectLinks, type LinkCheck } from "./links";
+import { higherPlan } from "@/lib/cmc/planLabel";
 import { allFromCache, sourceNote, type StepEvent, type StepId } from "./steps";
 import { scoreReport, verdictText, type ScoreResult } from "./score";
 import {
@@ -89,7 +90,7 @@ const pickOne = <T>(a: Avail<Record<number, T>>, id: number): Avail<T> => {
 /** Report the outcome of one Avail as a finished step. */
 function stepFor(id: StepId, a: Avail<unknown>): StepEvent {
   if (a.status === "ok") return { type: "step", id, status: "done", note: sourceNote(a.source) };
-  if (a.status === "plan") return { type: "step", id, status: "blocked", note: "needs a paid CMC plan" };
+  if (a.status === "plan") return { type: "step", id, status: "blocked", note: `needs ${higherPlan(id === "markets" ? "marketPairs" : undefined)}` };
   if (a.status === "none") return { type: "step", id, status: "skipped", note: id === "contract" || id === "liquidity" ? "not a token" : "not needed" };
   return { type: "step", id, status: "failed", note: "no data" };
 }

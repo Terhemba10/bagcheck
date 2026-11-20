@@ -91,7 +91,7 @@ export default function DesignPage() {
             { id: "market", status: "done", note: "cached" },
             { id: "contract", status: "done", note: "live" },
             { id: "liquidity", status: "running" },
-            { id: "markets", status: "blocked", note: "needs a paid CMC plan" },
+            { id: "markets", status: "blocked", note: "needs a higher CMC plan (Standard)" },
             { id: "links", status: "pending" },
             { id: "score", status: "pending" },
             { id: "roadmap", status: "pending" },
@@ -202,7 +202,7 @@ export default function DesignPage() {
             Anyone who guarantees to recover lost crypto for an upfront fee is running a scam. Real authorities never charge recovery fees.
           </Notice>
           <Notice tone="warn" title="Monitoring paused to save API credits">Reports still work. Watchlist checks resume when credits reset.</Notice>
-          <Notice tone="info" title="Recorded data">Recorded from the live CMC API on 19 Nov 2026. This data needs a paid plan, so it isn&apos;t live right now.</Notice>
+          <Notice tone="info" title="Recorded data">Recorded from the live CMC API on 19 Nov 2026. This data needs a higher CMC plan, so it isn&apos;t live right now.</Notice>
           <Notice tone="danger" title="Never share your seed phrase">Covex will never ask for it. If you pasted one anywhere, move your funds to a new wallet.</Notice>
           <Disclaimer />
         </div>

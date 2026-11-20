@@ -1,3 +1,4 @@
+import { tierFor } from "@/lib/cmc/planLabel";
 import type { Metadata } from "next";
 import { getApiStatus } from "@/lib/cmc/status";
 
@@ -6,7 +7,7 @@ export const metadata: Metadata = { title: "API evidence · Covex" };
 
 const CAP_LABEL = {
   available: { icon: "✓", text: "Works on this key", cls: "text-ok" },
-  plan_blocked: { icon: "⛔", text: "Needs a paid plan", cls: "text-warn" },
+  plan_blocked: { icon: "⛔", text: "Needs a higher CMC plan", cls: "text-warn" },
   unknown: { icon: "•", text: "Not called yet", cls: "text-muted" },
 } as const;
 
@@ -77,6 +78,7 @@ export default async function EvidencePage() {
                 <p className="mt-1 text-muted">{e.purpose}</p>
                 <p className={`mt-1 ${c.cls}`}>
                   <span aria-hidden="true">{c.icon}</span> {c.text}
+                      {e.capability.state === "plan_blocked" && tierFor(e.key) ? ` (${tierFor(e.key)})` : ""}
                 </p>
               </li>
             );
@@ -100,6 +102,7 @@ export default async function EvidencePage() {
                     <td className="px-4 py-2 text-muted">{e.purpose}</td>
                     <td className={`px-4 py-2 ${c.cls}`}>
                       <span aria-hidden="true">{c.icon}</span> {c.text}
+                      {e.capability.state === "plan_blocked" && tierFor(e.key) ? ` (${tierFor(e.key)})` : ""}
                     </td>
                   </tr>
                 );
