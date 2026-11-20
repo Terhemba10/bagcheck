@@ -126,7 +126,7 @@ export function RiskBoardView({ initial = null }: { initial?: RiskBoard | null }
             <span role="columnheader" className="hidden xl:block">Top warning sign</span>
             <span role="columnheader" className="hidden min-[87.5rem]:block">Promises</span>
           </div>
-          <VirtualRows rows={rows} full={full} opening={opening} onOpen={open} dealFromStart={!initial} />
+          <VirtualRows rows={rows} full={full} opening={opening} onOpen={open} onIntent={(r) => router.prefetch(`/coin/${r.id}`)} dealFromStart={!initial} />
           {rows.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted">No coins match this filter right now.</p>}
           {load.b.sparkNote && <p className="px-4 text-xs text-faint">{load.b.sparkNote}</p>}
         </div>
@@ -193,12 +193,15 @@ function VirtualRows({
   full,
   opening,
   onOpen,
+  onIntent,
   dealFromStart,
 }: {
   rows: BoardRow[];
   full: boolean;
   opening: number | null;
   onOpen: (r: BoardRow) => void;
+  /** hover/focus: prefetch the report so opening it is near-instant */
+  onIntent: (r: BoardRow) => void;
   /** false when the rows were server-rendered: they're already visible, so no deal-in */
   dealFromStart: boolean;
 }) {
@@ -251,7 +254,7 @@ function VirtualRows({
         const i = range.start + k;
         return (
           <Slot key={r.id} index={i} full={full}>
-            <Row row={r} index={i} full={full} deal={full && !dealt} opening={opening === r.id} onOpen={() => onOpen(r)} />
+            <Row row={r} index={i} full={full} deal={full && !dealt} opening={opening === r.id} onOpen={() => onOpen(r)} onIntent={() => onIntent(r)} />
           </Slot>
         );
       })}
@@ -280,7 +283,23 @@ function Slot({ index, full, children }: { index: number; full: boolean; childre
   );
 }
 
-function Row({ row, index, full, deal, opening, onOpen }: { row: BoardRow; index: number; full: boolean; deal: boolean; opening: boolean; onOpen: () => void }) {
+function Row({
+  row,
+  index,
+  full,
+  deal,
+  opening,
+  onOpen,
+  onIntent,
+}: {
+  row: BoardRow;
+  index: number;
+  full: boolean;
+  deal: boolean;
+  opening: boolean;
+  onOpen: () => void;
+  onIntent: () => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const rx = useMotionValue(0);
   const ry = useMotionValue(0);
@@ -320,7 +339,11 @@ function Row({ row, index, full, deal, opening, onOpen }: { row: BoardRow; index
       ref={ref}
       role="row"
       aria-rowindex={index + 2}
-      onFocus={(e) => e.currentTarget.scrollIntoView({ block: "nearest" })}
+      onFocus={(e) => {
+        e.currentTarget.scrollIntoView({ block: "nearest" });
+        onIntent();
+      }}
+      onPointerEnter={onIntent}
       initial={deal ? { opacity: 0, z: -80, y: 10, rotateX: -6 } : false}
       animate={!full ? undefined : opening ? { z: 60, scale: 1.015, opacity: 1, y: 0, rotateX: 0 } : { opacity: 1, z: 0, y: 0, rotateX: 0 }}
       transition={{ ...spring.soft, delay: opening || !deal ? 0 : delay }}
