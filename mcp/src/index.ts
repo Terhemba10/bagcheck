@@ -1,9 +1,9 @@
 /**
- * bagcheck-mcp: Bagcheck for AI assistants (Model Context Protocol, stdio).
+ * covex-mcp: Covex for AI assistants (Model Context Protocol, stdio).
  *
  * Tools: check_token, promise_check, watch_token, rescue_plan.
  * Every result is information, not advice, and ends with the disclaimer.
- * Code decides (Bagcheck's server computes scores from CoinMarketCap data);
+ * Code decides (Covex's server computes scores from CoinMarketCap data);
  * the assistant only relays and explains.
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -14,7 +14,7 @@ import { EXCHANGE_SUPPORT, IC3, revokeCheckerFor, SCAM_SHIELD, WALLET_HELP } fro
 import { detectSecret } from "../../lib/safety/secrets";
 import { api, ApiError, BASE_URL, resolveCoin } from "./api";
 
-const DISCLAIMER = "Not financial advice. Bagcheck explains data. It never tells you to buy or sell.";
+const DISCLAIMER = "Not financial advice. Covex explains data. It never tells you to buy or sell.";
 
 type Content = { content: { type: "text"; text: string }[]; isError?: boolean };
 const text = (t: string): Content => ({ content: [{ type: "text", text: `${t}\n\n${DISCLAIMER}` }] });
@@ -24,7 +24,7 @@ const fail = (t: string): Content => ({ content: [{ type: "text", text: t }], is
 function guard(...inputs: string[]): Content | null {
   for (const i of inputs) {
     const hit = detectSecret(i);
-    if (hit) return fail(`Blocked: ${hit.message.replace("so it wasn't sent", "so Bagcheck didn't use it")}`);
+    if (hit) return fail(`Blocked: ${hit.message.replace("so it wasn't sent", "so Covex didn't use it")}`);
   }
   return null;
 }
@@ -33,7 +33,7 @@ async function run(fn: () => Promise<Content>): Promise<Content> {
   try {
     return await fn();
   } catch (e) {
-    return fail(e instanceof ApiError ? e.message : "Bagcheck couldn't be reached. Please try again shortly.");
+    return fail(e instanceof ApiError ? e.message : "Covex couldn't be reached. Please try again shortly.");
   }
 }
 
@@ -74,10 +74,10 @@ const pctT = (x: number) => `${(x * 100).toFixed(x < 0.01 ? 2 : 1)}%`;
 // ─── server ───────────────────────────────────────────────────────────────────
 
 const server = new McpServer(
-  { name: "bagcheck", version: "0.1.0" },
+  { name: "covex", version: "0.1.0" },
   {
     instructions:
-      "Bagcheck explains crypto risk in plain English from live CoinMarketCap data. Relay its findings faithfully; never tell the user to buy, sell or hold, never call a coin a scam, and never ask for seed phrases or private keys.",
+      "Covex explains crypto risk in plain English from live CoinMarketCap data. Relay its findings faithfully; never tell the user to buy, sell or hold, never call a coin a scam, and never ask for seed phrases or private keys.",
   },
 );
 
@@ -114,7 +114,7 @@ server.registerTool(
   {
     title: "What did the founders promise?",
     description:
-      "Reads the project's own website and roadmap/whitepaper pages and lists what it says it will deliver and by when. Every quote is verified word-for-word against the page it links to; dates and statuses are computed by Bagcheck.",
+      "Reads the project's own website and roadmap/whitepaper pages and lists what it says it will deliver and by when. Every quote is verified word-for-word against the page it links to; dates and statuses are computed by Covex.",
     inputSchema: { coin: z.string().min(1).max(100).describe("Coin name, symbol, CoinMarketCap id or contract address") },
   },
   async ({ coin }) =>
@@ -128,7 +128,7 @@ server.registerTool(
         `${p.promises.length} commitment${p.promises.length === 1 ? "" : "s"} found on the project's own pages${p.readOn ? ` · ${p.readOn}` : ""}:`,
         ...p.promises.map((x) => `- ${x.dueDate ?? "no date"} [${status[x.status] ?? x.status}] ${x.promise}. Quote: "${x.quote}" (${x.sourceUrl})`),
         "",
-        "'Date passed' only means the date has gone by; Bagcheck can't confirm delivery, so check the source.",
+        "'Date passed' only means the date has gone by; Covex can't confirm delivery, so check the source.",
         `Timeline: ${BASE_URL}/coin/${ref.id}#promises-title`,
       ];
       return text(lines.join("\n"));
@@ -140,7 +140,7 @@ server.registerTool(
   {
     title: "Watch a coin",
     description:
-      "Adds a coin to an anonymous Bagcheck watchlist (or removes it, or lists the watchlist). Bagcheck re-checks watched coins on a schedule and can alert on Telegram when warning signs appear: falling volume, fewer markets, draining liquidity, a supply jump, the website going down, or a promise date passing.",
+      "Adds a coin to an anonymous Covex watchlist (or removes it, or lists the watchlist). Covex re-checks watched coins on a schedule and can alert on Telegram when warning signs appear: falling volume, fewer markets, draining liquidity, a supply jump, the website going down, or a promise date passing.",
     inputSchema: {
       coin: z.string().max(100).optional().describe("Coin to watch or unwatch (not needed for 'list')"),
       action: z.enum(["watch", "unwatch", "list"]).default("watch"),
@@ -159,7 +159,7 @@ server.registerTool(
       const lines = [
         action === "watch" ? "Watching. " : action === "unwatch" ? "Removed. " : "",
         wl.coins.length ? `Watchlist (${wl.coins.length}/${wl.max}): ${wl.coins.map((c) => `${c.name} (${c.symbol})`).join(", ")}.` : "The watchlist is empty.",
-        wl.monitor.intervalHours ? `Bagcheck re-checks watched coins about every ${wl.monitor.intervalHours} hours.` : "",
+        wl.monitor.intervalHours ? `Covex re-checks watched coins about every ${wl.monitor.intervalHours} hours.` : "",
       ];
       if (!wl.telegramLinked && wl.coins.length) {
         const link = await api<{ url: string }>("/api/telegram/link", { method: "POST", withUid: true });

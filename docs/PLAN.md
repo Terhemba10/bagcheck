@@ -1,4 +1,4 @@
-# Bagcheck — Build Plan (draft for approval)
+# Covex — Build Plan (draft for approval)
 
 Status: **approved 19 Nov 2026** (with Basic mode + Gemini changes). Written 19 Nov 2026. Target: submission-ready **5 Dec**, hard deadline **9 Dec 23:59 UTC**.
 
@@ -38,7 +38,7 @@ Startup: **450,000 credits/month, 600 calls/min**, intraday history 1 month, **d
 | 12 | `GET /v4/dex/spot-pairs/latest` / `/v4/dex/pairs/quotes/latest` | DEX pair liquidity, holders, taxes for contract tokens | ~1 |
 | 13 | `GET /v1/key/info` | Credit-usage meter on the API Evidence page | free |
 
-This is a much richer "interesting use of the API" story than the brief assumed. The **DEX security + liquidity history** endpoints are the standout features: they let Bagcheck spot warning signs (honeypot, high sell tax, mint authority, liquidity pulls) that a plain price API can't.
+This is a much richer "interesting use of the API" story than the brief assumed. The **DEX security + liquidity history** endpoints are the standout features: they let Covex spot warning signs (honeypot, high sell tax, mint authority, liquidity pulls) that a plain price API can't.
 
 ### To verify on the first live call (I'll record the results in `docs/API_FEEDBACK.md`)
 - Whether `market-pairs/latest` returns order-book depth (`depth_negative_two` / `depth_positive_two`) on Startup. The current docs don't list those fields. If they're missing, "price impact" comes from DEX pool `liqUsd` (constant-product estimate) and `effective_liquidity`, labelled "estimate", and pairs with no depth data say so.
@@ -90,7 +90,7 @@ The judging-period budget on Basic: 15k/month ≈ 500/day. Monitoring takes ≤ 
                                      ▼        ▼          ▼
                                lib/cmc    lib/llm    lib/store (Upstash)
                                (CMC API)  (Anthropic|Gemini)
- MCP client ──▶ mcp/ (bagcheck-mcp, stdio) ──HTTP──▶ /api/v1/* (same core)
+ MCP client ──▶ mcp/ (covex-mcp, stdio) ──HTTP──▶ /api/v1/* (same core)
 ```
 
 **Code decides, AI explains.** `lib/core/score.ts` and `lib/core/alerts/*.ts` are pure functions that turn CMC data into numbers. The LLM only gets those computed signals for writing explanations, plus page text for extracting promises. It never produces a score.
@@ -162,7 +162,7 @@ Alert rules (Stage 2) compare consecutive snapshots: overdue promise, volume fal
 | **c** Stage 1 report + Promise check | 25–27 Nov | Search → report → score → promise timeline, LLM explanations |
 | **d** Stage 2 watchlist + cron + Telegram | 28–30 Nov | Snapshots, 7 alert rules, health charts, bot commands + pushed alerts |
 | **e** Stage 3 Rescue plan | 1 Dec | Liquidity ranking + impact estimate, wallet steps, evidence download, scam shield, seed-phrase blocker, Lessons |
-| **f** MCP server | 2 Dec | `bagcheck-mcp` with 4 tools, tested in Claude Desktop/Code |
+| **f** MCP server | 2 Dec | `covex-mcp` with 4 tools, tested in Claude Desktop/Code |
 | **g** Tests + CI + docs | 3 Dec | Vitest + Playwright (mocked CMC), CI workflow, README + diagram |
 | **h** Deploy + video + submission | 4–5 Dec | Vercel live, ~3 min video, `SUBMISSION.md`, `X_POST.md` |
 | **demo recordings** | 5–7 Dec | `scripts/record-demo.ts` run on Startup; `data/demo/` committed |
@@ -185,6 +185,6 @@ Disclaimer component on every report and in every alert footer. The words "scam"
 | **Upstash Redis** URL + token | phase a (evidence log) | console.upstash.com → Create database (free) → REST URL + token |
 | **Telegram bot token** | phase d | Telegram → @BotFather → /newbot |
 | **Vercel account** linked to GitHub | phase h (I'll ask before deploying) | vercel.com |
-| **OK to create public repo `Terhemba10/bagcheck`** | when you want to push (I'll ask) | — |
+| **OK to create public repo `Terhemba10/covex`** | when you want to push (I'll ask) | — |
 
 Nothing in this plan costs money beyond your existing CMC Startup plan; every other service is a free tier.

@@ -4,7 +4,7 @@ import { ENDPOINTS, planAllows, type EndpointKey, type Plan } from "./endpoints"
 /**
  * Live record of which endpoints the current key can use. Filled in from real
  * responses: a 1006 marks an endpoint `plan_blocked` for 24 h, a success marks
- * it `available`. This is how Bagcheck adapts when the key drops from Startup
+ * it `available`. This is how Covex adapts when the key drops from Startup
  * to Basic after 9 Dec without a redeploy.
  */
 export type Capability = "available" | "plan_blocked" | "unknown";

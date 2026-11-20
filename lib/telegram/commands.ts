@@ -31,7 +31,7 @@ const LEVEL_TG: Record<Level, string> = {
 const CONCERN_TG = { low: "✓ Low concern", medium: "▲ Medium concern", high: "⬣ High concern" } as const;
 
 export const HELP_TEXT = [
-  "<b>Hi, I'm Bag.</b> I check coins with live CoinMarketCap data and warn you about warning signs.",
+  "<b>Hi, I'm Covex.</b> I check coins with live CoinMarketCap data and warn you about warning signs.",
   "",
   "/check <i>coin</i> · a plain-English risk report",
   "/watch <i>coin</i> · I'll re-check it and alert you here",

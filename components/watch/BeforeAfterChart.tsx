@@ -23,7 +23,7 @@ export function BeforeAfterChart({ series, label, severity }: { series: { at: st
         <text x={pad.l} y={h - 6} fill="var(--color-faint)" fontSize="12">{fmtDay(series[0]!.at)}</text>
         <text x={w - pad.r} y={h - 6} fill="var(--color-faint)" fontSize="12" textAnchor="end">{fmtDay(series.at(-1)!.at)}</text>
       </svg>
-      <figcaption className="text-xs text-faint">Each point is one of Bag&apos;s checks (live CoinMarketCap data at the time).</figcaption>
+      <figcaption className="text-xs text-faint">Each point is one of Covex&apos;s checks (live CoinMarketCap data at the time).</figcaption>
     </figure>
   );
 }

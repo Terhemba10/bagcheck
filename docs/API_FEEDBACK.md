@@ -1,6 +1,6 @@
 # CoinMarketCap API feedback
 
-What we ran into while building Bagcheck on the CMC API (Nov 2026), written so the CMC team can act on it. Everything below was found with live calls on a **Basic** key (15,000 credits/month, 50 calls/min) unless noted. The real call log is in [`API_EVIDENCE.md`](API_EVIDENCE.md), and per-endpoint status is in [`ENDPOINTS.md`](ENDPOINTS.md).
+What we ran into while building Covex on the CMC API (Nov 2026), written so the CMC team can act on it. Everything below was found with live calls on a **Basic** key (15,000 credits/month, 50 calls/min) unless noted. The real call log is in [`API_EVIDENCE.md`](API_EVIDENCE.md), and per-endpoint status is in [`ENDPOINTS.md`](ENDPOINTS.md).
 
 ## Summary for the submission note
 
@@ -22,7 +22,7 @@ What we ran into while building Bagcheck on the CMC API (Nov 2026), written so t
 | `/v1/dex/security/detail`, `/v1/dex/token/pools` | not stated on every page | ✅ works |
 | `/v3/cryptocurrency/listings/latest`, `/v3/.../quotes/latest`, `/v2/.../info`, `/v5/.../ohlcv/historical`, `/v1/global-metrics/quotes/latest` | Basic | ✅ works |
 
-- `1006` responses cost 0 credits, which made it safe to detect plan access at runtime. Bagcheck marks an endpoint as unavailable for 24 h after a `1006` and labels the feature in the UI ("needs a paid CoinMarketCap plan"), so the same code runs on Basic and Startup.
+- `1006` responses cost 0 credits, which made it safe to detect plan access at runtime. Covex marks an endpoint as unavailable for 24 h after a `1006` and labels the feature in the UI ("needs a paid CoinMarketCap plan"), so the same code runs on Basic and Startup.
 - **Suggestion:** one machine-readable list of endpoints per plan (or a field in `/v1/key/info` listing what the key can call) would remove the guesswork. The pricing page's matrix and the per-endpoint reference pages don't fully agree, and some DEX pages (`/v1/dex/search`, `/v1/dex/liquidity-change/list`) show no tier at all.
 - The Basic **daily** credit limit isn't published. `/v1/key/info` reports `current_day.credits_used`, but not a daily allowance for Basic, so we set our own cap of 400 per day.
 
@@ -46,17 +46,17 @@ What we ran into while building Bagcheck on the CMC API (Nov 2026), written so t
   - `to` in seconds and in milliseconds;
   - with and without `needLatest`.
 
-  The reference lists no allowed values, and its example has no parameters. We would have used this for the "liquidity draining" alert. Instead, Bagcheck stores its own snapshots of `/v1/dex/token/pools` liquidity and compares those. **Suggestion:** a working example request and an `error_detail` naming the bad parameter.
+  The reference lists no allowed values, and its example has no parameters. We would have used this for the "liquidity draining" alert. Instead, Covex stores its own snapshots of `/v1/dex/token/pools` liquidity and compares those. **Suggestion:** a working example request and an `error_detail` naming the bad parameter.
 - **Version drift:** quotes and listings are documented at `/v3/...`, but many guides (and our own first plan) use `/v2/...`. A short migration note would help.
 
 ## Fields we wanted but couldn't confirm
 
-- **Market-pair depth** (`depth_negative_two` / `depth_positive_two`, ±2% order-book depth): useful for "how much can I sell before the price drops 2%?", but missing from the current reference for `/v2/cryptocurrency/market-pairs/latest`, and we couldn't confirm it live because that endpoint is blocked on Basic. Bagcheck's rescue estimate uses a 50/50 pool model on DEX liquidity instead, and is labelled as an estimate.
+- **Market-pair depth** (`depth_negative_two` / `depth_positive_two`, ±2% order-book depth): useful for "how much can I sell before the price drops 2%?", but missing from the current reference for `/v2/cryptocurrency/market-pairs/latest`, and we couldn't confirm it live because that endpoint is blocked on Basic. Covex's rescue estimate uses a 50/50 pool model on DEX liquidity instead, and is labelled as an estimate.
 - **Global metrics:** the documented example has no percent change for total market cap. For "versus the market" we compare with Bitcoin's 7- and 30-day change from the quotes call.
 
 ## What worked well
 
-- **`/v1/key/info` and `/v1/cryptocurrency/map` cost 0 credits.** This let Bagcheck budget its own background monitoring (it adapts the schedule to the credits left) and keep search free.
+- **`/v1/key/info` and `/v1/cryptocurrency/map` cost 0 credits.** This let Covex budget its own background monitoring (it adapts the schedule to the credits left) and keep search free.
 - **DEX security detail on the free plan:** honeypot, taxes, blacklist, mintable/freezable and vendor flags in one call. This is what lets a beginner see contract-level warning signs.
 - **DEX token pools on the free plan:** live liquidity per pool, which powers "Can I still sell?", the price-impact estimate and the liquidity alert.
 - **v3 quotes split `cex_volume_24h` and `dex_volume_24h`**, which is useful for spotting coins that trade on only one kind of venue.

@@ -4,8 +4,8 @@
  */
 import type { Alert } from "@/lib/monitor/store";
 
-export const DISCLAIMER_TG = "Not financial advice. Bagcheck explains data. It never tells you to buy or sell.";
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bagcheck-azure.vercel.app";
+export const DISCLAIMER_TG = "Not financial advice. Covex explains data. It never tells you to buy or sell.";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://covex-ai.vercel.app";
 export const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? "BagcheckAlertsBot";
 
 export function escapeHtml(s: string): string {

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     title: "[Test] This is what an alert looks like",
     before: snaps[1] ? money(snaps[1].volume24h) : "—",
     after: s ? money(s.volume24h) : "—",
-    meaning: "This is a test message from Bagcheck to check that alerts reach you. Nothing has happened to this coin; the numbers are its latest real 24h volume.",
+    meaning: "This is a test message from Covex to check that alerts reach you. Nothing has happened to this coin; the numbers are its latest real 24h volume.",
     next: ["No action needed. Real alerts look like this, with the evidence linked below."],
     metric: "volume24h",
     at: new Date().toISOString(),

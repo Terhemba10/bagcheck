@@ -1,5 +1,5 @@
 /**
- * Every CMC endpoint Bagcheck calls, in one place.
+ * Every CMC endpoint Covex calls, in one place.
  *
  * `minPlan` is what the docs say (checked 19 Nov 2026). We do NOT rely on it at
  * runtime for real access decisions: live 1006 responses are the source of
@@ -14,7 +14,7 @@ export interface EndpointDef {
   minPlan: Plan;
   /** Cache TTL in seconds. */
   ttl: number;
-  /** What Bagcheck uses it for (shown on /evidence). */
+  /** What Covex uses it for (shown on /evidence). */
   purpose: string;
   /** Log successful calls to the evidence list at most this often (seconds). Errors are always logged. */
   evidenceEvery?: number;

@@ -1,20 +1,20 @@
 /**
- * README media from the live site in real Chrome (GPU, so Bag renders in 3D):
- *  - docs/media/bag-scan.webm: home → search "pepe" → Bag scans → verdict
+ * README media in real Chrome:
+ *  - docs/media/covex-scan.webm: home → search → the agent activity steps run → verdict → cards assemble
  *  - docs/media/*.png: report and rescue plan screenshots
- * Then make the GIF (cuts the wait while the report renders; adjust the times to the clip):
- *   F="select='between(t,1.5,10.6)+between(t,15.2,27.5)',setpts=N/FRAME_RATE/TB,fps=8,scale=680:-1:flags=lanczos"
- *   ffmpeg -i bag-scan.webm -vf "$F,palettegen=max_colors=128:stats_mode=diff" pal.png
- *   ffmpeg -i bag-scan.webm -i pal.png -lavfi "$F [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=4" bag-scan.gif
+ * Then make the GIF (trims the blank first frame):
+ *   F="trim=start=1.6,setpts=PTS-STARTPTS,fps=8,scale=680:-1:flags=lanczos"
+ *   ffmpeg -i covex-scan.webm -vf "$F,palettegen=max_colors=128:stats_mode=diff" pal.png
+ *   ffmpeg -i covex-scan.webm -i pal.png -lavfi "$F [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=4" covex-scan.gif
  *
- *   npx tsx scripts/record-demo.ts            # BASE_URL defaults to the live site
- * Reports are cached, so a run usually costs 0–4 CMC credits.
+ *   DEMO_QUERY=sui npx tsx scripts/record-demo.ts   # BASE_URL defaults to the live site
+ * Pick a coin whose report isn't cached (5 min) so the steps run live. About 4 CMC credits.
  */
 import { chromium } from "@playwright/test";
 import { mkdirSync, readdirSync, renameSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
-const base = process.env.BASE_URL ?? "https://bagcheck-azure.vercel.app";
+const base = process.env.BASE_URL ?? "https://covex-ai.vercel.app";
 const out = "docs/media";
 const size = { width: 1280, height: 760 };
 
@@ -32,17 +32,19 @@ async function main() {
   await page.waitForTimeout(2500);
   const box = page.getByRole("combobox");
   await box.click();
-  await box.pressSequentially("pepe", { delay: 140 });
+  await box.pressSequentially(process.env.DEMO_QUERY ?? "pepe", { delay: 140 });
   await page.getByRole("option").first().waitFor();
   await page.waitForTimeout(700);
   await page.keyboard.press("Enter");
   await page.waitForURL(/\/coin\/\d+/);
-  await page.waitForTimeout(9000); // scan steps, then the spoken verdict
+  await page.getByText("Covex verdict").waitFor();
+  await page.locator("text=/\\d+\\/8 done/").waitFor({ timeout: 60_000 }).catch(() => undefined);
+  await page.waitForTimeout(2500); // cards assemble, numbers count up
   await page.mouse.wheel(0, 500);
   await page.waitForTimeout(2500);
   await ctx.close(); // flushes the video
   const webm = readdirSync(tmp).find((f) => f.endsWith(".webm"));
-  if (webm) renameSync(join(tmp, webm), join(out, "bag-scan.webm"));
+  if (webm) renameSync(join(tmp, webm), join(out, "covex-scan.webm"));
   rmSync(tmp, { recursive: true, force: true });
 
   // 2. stills
@@ -60,7 +62,7 @@ async function main() {
     console.log(`saved ${out}/${name}.png`);
   }
   await browser.close();
-  console.log(`saved ${out}/bag-scan.webm`);
+  console.log(`saved ${out}/covex-scan.webm`);
 }
 
 main().catch((e) => {

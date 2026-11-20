@@ -1,7 +1,7 @@
 /**
  * Visual regression check for two bugs:
  *  1. search dropdown must be solid and above the chips / later sections
- *  2. hero must show Bag immediately (2D), then cross-fade to 3D
+ *  2. hero must show Covex immediately (2D), then cross-fade to 3D
  *
  *   npx tsx scripts/check-search-hero.ts            (BASE_URL to test another host)
  */
@@ -19,7 +19,7 @@ async function main() {
   for (const w of [390, 1440]) {
     const page = await (await browser.newContext({ viewport: { width: w, height: 900 } })).newPage();
 
-    // 2. hero is never empty: Bag visible ~200 ms after load
+    // 2. hero is never empty: Covex visible ~200 ms after load
     await page.goto(base + "/", { waitUntil: "domcontentloaded", timeout: 90_000 });
     await page.waitForTimeout(200);
     const early = await page.evaluate(() => {

@@ -1,0 +1,287 @@
+{
+  "recordedAt": "2026-11-20T08:50:26.922Z",
+  "endpoint": "/v2/cryptocurrency/price-performance-stats/latest",
+  "params": {
+    "id": "1,24478,35336",
+    "time_period": "all_time,90d,30d,7d"
+  },
+  "response": {
+    "data": {
+      "1": {
+        "id": 1,
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "slug": "bitcoin",
+        "last_updated": "2026-11-20T08:50:00.000Z",
+        "periods": {
+          "all_time": {
+            "quote": {
+              "USD": {
+                "open": 0.0618333,
+                "open_timestamp": "2010-07-13T00:00:00.000Z",
+                "high": 126198.06960343386,
+                "high_timestamp": "2025-10-06T19:00:00.000Z",
+                "low": 0.04864654,
+                "low_timestamp": "2010-07-14T19:25:00.000Z",
+                "close": 61827.347422034516,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": 99990273.18408449,
+                "price_change": 61827.285588734514
+              }
+            },
+            "open_timestamp": "2010-07-13T00:00:00.000Z",
+            "high_timestamp": "2025-10-06T18:59:00.000Z",
+            "low_timestamp": "2010-07-14T19:24:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "90d": {
+            "quote": {
+              "USD": {
+                "open": 77166.34182646064,
+                "open_timestamp": "2026-08-22T08:50:30.837Z",
+                "high": 87363.75676816357,
+                "high_timestamp": "2026-09-21T20:30:00.000Z",
+                "low": 61240.194841257195,
+                "low_timestamp": "2026-11-20T02:15:00.000Z",
+                "close": 61827.347422034516,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -19.877830205975012,
+                "price_change": -15338.994404426125
+              }
+            },
+            "open_timestamp": "2026-08-22T08:50:30.837Z",
+            "high_timestamp": "2026-09-21T20:30:00.000Z",
+            "low_timestamp": "2026-11-20T02:13:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "30d": {
+            "quote": {
+              "USD": {
+                "open": 83234.41761927071,
+                "open_timestamp": "2026-10-21T08:50:30.837Z",
+                "high": 84840.04326249336,
+                "high_timestamp": "2026-10-21T16:40:00.000Z",
+                "low": 61240.194841257195,
+                "low_timestamp": "2026-11-20T02:15:00.000Z",
+                "close": 61827.347422034516,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -25.719012410414173,
+                "price_change": -21407.070197236193
+              }
+            },
+            "open_timestamp": "2026-10-21T08:50:30.837Z",
+            "high_timestamp": "2026-10-21T16:40:00.000Z",
+            "low_timestamp": "2026-11-20T02:13:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "7d": {
+            "quote": {
+              "USD": {
+                "open": 68739.35165951136,
+                "open_timestamp": "2026-11-13T08:50:30.837Z",
+                "high": 68377.53835641005,
+                "high_timestamp": "2026-11-14T00:10:00.000Z",
+                "low": 61240.194841257195,
+                "low_timestamp": "2026-11-20T02:15:00.000Z",
+                "close": 61827.347422034516,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -10.05538177274973,
+                "price_change": -6912.004237476844
+              }
+            },
+            "open_timestamp": "2026-11-13T08:50:30.837Z",
+            "high_timestamp": "2026-11-14T00:09:00.000Z",
+            "low_timestamp": "2026-11-20T02:13:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          }
+        }
+      },
+      "24478": {
+        "id": 24478,
+        "name": "Pepe",
+        "symbol": "PEPE",
+        "slug": "pepe",
+        "last_updated": "2026-11-20T08:50:00.000Z",
+        "periods": {
+          "all_time": {
+            "quote": {
+              "USD": {
+                "open": 9.03278e-12,
+                "open_timestamp": "2023-04-17T06:18:08.000Z",
+                "high": 0.00002824724704576,
+                "high_timestamp": "2024-12-09T16:35:00.000Z",
+                "low": 1.06277e-11,
+                "low_timestamp": "2023-04-14T17:35:00.000Z",
+                "close": 0.00000361002267796,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": 39965698.76804262,
+                "price_change": 0.00000361001364518
+              }
+            },
+            "open_timestamp": "2023-04-17T06:18:08.000Z",
+            "high_timestamp": "2024-12-09T16:33:00.000Z",
+            "low_timestamp": "2023-04-14T17:34:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "90d": {
+            "quote": {
+              "USD": {
+                "open": 0.00000411984999797,
+                "open_timestamp": "2026-08-22T08:50:30.837Z",
+                "high": 0.00000564829704107,
+                "high_timestamp": "2026-10-29T16:10:00.000Z",
+                "low": 0.00000322350394484,
+                "low_timestamp": "2026-09-10T16:35:00.000Z",
+                "close": 0.00000361002267796,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -12.374900063381203,
+                "price_change": -5.0982732001e-7
+              }
+            },
+            "open_timestamp": "2026-08-22T08:50:30.837Z",
+            "high_timestamp": "2026-10-29T16:11:00.000Z",
+            "low_timestamp": "2026-09-10T16:37:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "30d": {
+            "quote": {
+              "USD": {
+                "open": 0.00000455909547123,
+                "open_timestamp": "2026-10-21T08:50:30.837Z",
+                "high": 0.00000564829704107,
+                "high_timestamp": "2026-10-29T16:10:00.000Z",
+                "low": 0.00000351436298123,
+                "low_timestamp": "2026-11-20T02:35:00.000Z",
+                "close": 0.00000361002267796,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -20.817129170886815,
+                "price_change": -9.4907279327e-7
+              }
+            },
+            "open_timestamp": "2026-10-21T08:50:30.837Z",
+            "high_timestamp": "2026-10-29T16:11:00.000Z",
+            "low_timestamp": "2026-11-20T02:33:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "7d": {
+            "quote": {
+              "USD": {
+                "open": 0.00000453742811438,
+                "open_timestamp": "2026-11-13T08:50:30.837Z",
+                "high": 0.00000443825667706,
+                "high_timestamp": "2026-11-14T00:50:00.000Z",
+                "low": 0.00000351436298123,
+                "low_timestamp": "2026-11-20T02:35:00.000Z",
+                "close": 0.00000361002267796,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -20.439011110299912,
+                "price_change": -9.2740543642e-7
+              }
+            },
+            "open_timestamp": "2026-11-13T08:50:30.837Z",
+            "high_timestamp": "2026-11-14T00:49:00.000Z",
+            "low_timestamp": "2026-11-20T02:33:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          }
+        }
+      },
+      "35336": {
+        "id": 35336,
+        "name": "OFFICIAL TRUMP",
+        "symbol": "TRUMP",
+        "slug": "official-trump",
+        "last_updated": "2026-11-20T08:50:00.000Z",
+        "periods": {
+          "all_time": {
+            "quote": {
+              "USD": {
+                "open": 6.834395973977122,
+                "open_timestamp": "2025-01-18T04:19:35.000Z",
+                "high": 75.35181987642682,
+                "high_timestamp": "2025-01-19T11:50:00.000Z",
+                "low": 0.8964464761494639,
+                "low_timestamp": "2026-11-14T22:15:00.000Z",
+                "close": 0.9305123474485104,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -86.38486340282944,
+                "price_change": -5.903883626528612
+              }
+            },
+            "open_timestamp": "2025-01-18T04:19:35.000Z",
+            "high_timestamp": "2025-01-19T11:52:00.000Z",
+            "low_timestamp": "2026-11-14T22:14:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "90d": {
+            "quote": {
+              "USD": {
+                "open": 2.7471587676289757,
+                "open_timestamp": "2026-08-22T08:50:30.837Z",
+                "high": 3.060412119140251,
+                "high_timestamp": "2026-08-29T04:50:00.000Z",
+                "low": 0.8964464761494639,
+                "low_timestamp": "2026-11-14T22:15:00.000Z",
+                "close": 0.9305123474485104,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -66.12819184631185,
+                "price_change": -1.8166464201804653
+              }
+            },
+            "open_timestamp": "2026-08-22T08:50:30.837Z",
+            "high_timestamp": "2026-08-29T04:49:00.000Z",
+            "low_timestamp": "2026-11-14T22:14:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "30d": {
+            "quote": {
+              "USD": {
+                "open": 1.8025068131180233,
+                "open_timestamp": "2026-10-21T08:50:30.837Z",
+                "high": 1.9181394926905513,
+                "high_timestamp": "2026-10-21T17:45:00.000Z",
+                "low": 0.8964464761494639,
+                "low_timestamp": "2026-11-14T22:15:00.000Z",
+                "close": 0.9305123474485104,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -48.37676392252377,
+                "price_change": -0.8719944656695129
+              }
+            },
+            "open_timestamp": "2026-10-21T08:50:30.837Z",
+            "high_timestamp": "2026-10-21T17:43:00.000Z",
+            "low_timestamp": "2026-11-14T22:14:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          },
+          "7d": {
+            "quote": {
+              "USD": {
+                "open": 1.0876549520557794,
+                "open_timestamp": "2026-11-13T08:50:30.837Z",
+                "high": 1.0993630060654302,
+                "high_timestamp": "2026-11-14T00:25:00.000Z",
+                "low": 0.8964464761494639,
+                "low_timestamp": "2026-11-14T22:15:00.000Z",
+                "close": 0.9305123474485104,
+                "close_timestamp": "2026-11-20T08:50:30.837Z",
+                "percent_change": -14.447836081677684,
+                "price_change": -0.157142604607269
+              }
+            },
+            "open_timestamp": "2026-11-13T08:50:30.837Z",
+            "high_timestamp": "2026-11-14T00:23:00.000Z",
+            "low_timestamp": "2026-11-14T22:14:00.000Z",
+            "close_timestamp": "2026-11-20T08:50:30.837Z"
+          }
+        }
+      }
+    },
+    "status": {
+      "timestamp": "2026-11-20T08:50:30.958Z",
+      "error_code": 0,
+      "error_message": null,
+      "elapsed": 121,
+      "credit_count": 1,
+      "notice": null
+    }
+  }
+}

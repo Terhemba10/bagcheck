@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Typed shapes for the CMC fields Bagcheck relies on. Schemas are lenient
+ * Typed shapes for the CMC fields Covex relies on. Schemas are lenient
  * (unknown keys pass through, most fields nullable) because CMC returns many
  * nulls for small coins. We validate what we use and nothing more.
  */

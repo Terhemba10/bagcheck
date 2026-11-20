@@ -18,7 +18,7 @@ export interface PageRead {
   ok: boolean;
   chars: number;
   note?: string;
-  /** When Bag read this page's current text (cached up to 7 days while the text is unchanged). */
+  /** When Covex read this page's current text (cached up to 7 days while the text is unchanged). */
   readAt?: string;
 }
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Agent2D } from "@/components/agent/Agent2D";
+import { CovexMark } from "@/components/brand/CovexMark";
 import { EvidencePack } from "@/components/rescue/EvidencePack";
 import { ProtectSection, ReportWhere, ScamShield } from "@/components/rescue/RescueSections";
 import { Disclaimer } from "@/components/ui/Notice";
@@ -12,7 +12,7 @@ export default function RescuePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-center">
-        <Agent2D state="rescue" size={110} />
+        <span className="grid size-16 shrink-0 place-items-center rounded-2xl border border-line bg-surface-1"><CovexMark size={40} tone="rescue" /></span>
         <div className="space-y-2">
           <p className="text-xs font-medium tracking-wide text-rescue uppercase">Rescue plan</p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Something went wrong? Let&apos;s take it one step at a time.</h1>
@@ -23,7 +23,7 @@ export default function RescuePage() {
 
       <section aria-labelledby="pick" className="space-y-3">
         <h2 id="pick" className="text-xl font-semibold">Which coin?</h2>
-        <p className="text-sm text-muted">Pick any coin to see where it can still be traded, an estimate of price impact for your amount, and what Bag&apos;s history shows.</p>
+        <p className="text-sm text-muted">Pick any coin to see where it can still be traded, an estimate of price impact for your amount, and what Covex&apos;s history shows.</p>
         <SearchBar size="md" target="rescue" />
       </section>
 

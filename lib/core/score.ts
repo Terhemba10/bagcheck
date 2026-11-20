@@ -41,7 +41,7 @@ export function scoreReport(signals: Signal[]): ScoreResult {
 }
 
 /**
- * The verdict Bag "speaks". Written by code from the computed result, so it
+ * The verdict Covex "speaks". Written by code from the computed result, so it
  * can never contradict the score. The AI explanation (later) adds colour only.
  */
 export function verdictText(name: string, s: ScoreResult): string {

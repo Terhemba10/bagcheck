@@ -1,5 +1,5 @@
 /**
- * Prompt for the Promise check. The model only extracts; Bagcheck verifies
+ * Prompt for the Promise check. The model only extracts; Covex verifies
  * every quote against the page text in code and computes dates/status itself.
  */
 export const EXTRACT_PROMISES_SYSTEM = `You read crypto project web pages and list the concrete, checkable commitments the project makes about the future.

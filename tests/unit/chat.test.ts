@@ -17,7 +17,7 @@ const report = {
 
 const facts = buildFacts(report, null);
 
-describe("ask Bag: answer checks", () => {
+describe("ask Covex: answer checks", () => {
   it("accepts an answer that only uses numbers from the facts", () => {
     expect(checkAnswer("Only 28% of tokens are out, and $14.5M sits in DEX pools. It scored 6 of 7 signals.", facts)).toEqual({ ok: true });
   });
@@ -33,7 +33,7 @@ describe("ask Bag: answer checks", () => {
   });
 });
 
-describe("ask Bag: fallback answers come from the report", () => {
+describe("ask Covex: fallback answers come from the report", () => {
   it("answers a liquidity question with the liquidity signal", () => {
     expect(fallbackAnswer("Can I still get out?", report, null)).toContain("$14.5M sits in DEX pools.");
   });

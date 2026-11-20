@@ -5,6 +5,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { PromiseItem } from "@/components/ui/PromiseItem";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { IconInfo } from "@/components/ui/icons";
+import type { StepEvent } from "@/lib/core/steps";
 import type { PromiseCheck } from "@/lib/promises/check";
 
 type Load = { s: "loading" } | { s: "ok"; data: PromiseCheck } | { s: "error"; message: string };
@@ -21,18 +22,25 @@ async function loadPromises(id: number, signal?: AbortSignal): Promise<Load | nu
 }
 
 /** "Promise check": what the founders promised and by when, read from their own pages. */
-export function PromiseTimeline({ id, onLoaded }: { id: number; onLoaded?: (d: PromiseCheck) => void }) {
+export function PromiseTimeline({ id, onLoaded, onStep }: { id: number; onLoaded?: (d: PromiseCheck) => void; onStep?: (e: StepEvent) => void }) {
   const [load, setLoad] = useState<Load>({ s: "loading" });
 
   useEffect(() => {
     const ctrl = new AbortController();
+    onStep?.({ type: "step", id: "roadmap", status: "running" });
     loadPromises(id, ctrl.signal).then((next) => {
       if (!next) return;
       setLoad(next);
-      if (next.s === "ok") onLoaded?.(next.data);
+      if (next.s === "ok") {
+        onLoaded?.(next.data);
+        const n = next.data.promises.length;
+        onStep?.({ type: "step", id: "roadmap", status: "done", note: n ? `${n} dated promise${n === 1 ? "" : "s"}` : "no dated promises" });
+      } else {
+        onStep?.({ type: "step", id: "roadmap", status: "failed", note: "not available" });
+      }
     });
     return () => ctrl.abort();
-  }, [id, onLoaded]);
+  }, [id, onLoaded, onStep]);
 
   return (
     <section aria-labelledby="promises-title" className="space-y-3">
@@ -50,7 +58,7 @@ export function PromiseTimeline({ id, onLoaded }: { id: number; onLoaded?: (d: P
       <GlassCard aria-busy={load.s === "loading"} aria-live="polite">
         {load.s === "loading" && (
           <div className="space-y-4">
-            <p className="text-sm text-muted">Bag is reading the roadmap…</p>
+            <p className="text-sm text-muted">Covex is reading the roadmap…</p>
             {[0, 1, 2].map((i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="h-3 w-24" />
@@ -81,7 +89,7 @@ export function PromiseTimeline({ id, onLoaded }: { id: number; onLoaded?: (d: P
       <p className="flex items-start gap-2 text-xs text-faint">
         <IconInfo className="mt-0.5 size-3.5 shrink-0" />
         Read by AI from the project&apos;s own pages. Every quote was checked word-for-word against the page it links to; items that
-        didn&apos;t match were dropped. Dates and statuses are worked out by Bagcheck, and &ldquo;date passed&rdquo; doesn&apos;t mean it wasn&apos;t
+        didn&apos;t match were dropped. Dates and statuses are worked out by Covex, and &ldquo;date passed&rdquo; doesn&apos;t mean it wasn&apos;t
         delivered: check the source.
       </p>
     </section>
@@ -102,7 +110,7 @@ function PagesRead({ d }: { d: PromiseCheck }) {
   return (
     <details className="mt-4 border-t border-line pt-3 text-sm text-muted">
       <summary className="cursor-pointer select-none">
-        Pages Bag read ({d.pages.filter((p) => p.ok).length} of {d.pages.length})
+        Pages Covex read ({d.pages.filter((p) => p.ok).length} of {d.pages.length})
         {d.dropped > 0 && ` · ${d.dropped} AI item${d.dropped === 1 ? "" : "s"} dropped (quote not found on the page)`}
       </summary>
       <ul className="mt-2 space-y-1">

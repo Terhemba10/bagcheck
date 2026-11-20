@@ -8,7 +8,7 @@ import { promisesKey, type PromiseCheck } from "@/lib/promises/check";
 import { LIMITS, rateLimit } from "@/lib/ratelimit";
 import { detectSecret } from "@/lib/safety/secrets";
 import { kv } from "@/lib/store/kv";
-import { ASK_BAG_SCHEMA, ASK_BAG_SYSTEM, askBagPrompt } from "@/prompts/askBag";
+import { ASK_BAG_SCHEMA, ASK_COVEX_SYSTEM, askBagPrompt } from "@/prompts/askCovex";
 
 export const maxDuration = 30;
 
@@ -20,7 +20,7 @@ const Body = z.object({
 const AiAnswer = z.object({ answer: z.string().min(1).max(1200), signals: z.array(z.string()).optional() });
 
 /**
- * "Ask Bag about this coin". Answers only from the computed report (+ cached
+ * "Ask Covex about this coin". Answers only from the computed report (+ cached
  * promise check). The question is never logged or stored.
  */
 export async function POST(req: Request) {
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       for (let attempt = 0; attempt < 2 && !answer; attempt++) {
         try {
           const out = await llm().json({
-            system: ASK_BAG_SYSTEM,
+            system: ASK_COVEX_SYSTEM,
             prompt: askBagPrompt(facts, question) + (attempt ? "\n\nReminder: use only numbers that appear in FACTS, and give no advice." : ""),
             schema: AiAnswer,
             jsonSchema: ASK_BAG_SCHEMA as unknown as Record<string, unknown>,

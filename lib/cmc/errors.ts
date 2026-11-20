@@ -35,7 +35,7 @@ export class CmcError extends Error {
         return "We've used today's CoinMarketCap allowance, so we're showing saved data where we have it.";
       case "auth":
       case "subscription":
-        return "Bagcheck can't reach CoinMarketCap right now (API key problem). The team has been notified.";
+        return "Covex can't reach CoinMarketCap right now (API key problem). The team has been notified.";
       case "bad_request":
       case "not_found":
         return "CoinMarketCap doesn't have this data for that coin.";

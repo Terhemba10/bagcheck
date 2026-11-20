@@ -45,7 +45,7 @@ export interface PageExtraction {
   items: PageItem[];
   /** AI items dropped (quote not found on the page). */
   dropped: number;
-  /** When Bag read this exact page text. */
+  /** When Covex read this exact page text. */
   extractedAt: string;
   /** true when this result came from the cache (no AI call). */
   cached?: boolean;

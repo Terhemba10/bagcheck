@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-11-20T08:50:29.003Z",
+  "plan": {
+    "credit_limit_monthly": 450000,
+    "credit_limit_monthly_reset": "In 10 days, 15 hours, 9 minutes",
+    "credit_limit_monthly_reset_timestamp": "2026-12-01T00:00:00.000Z",
+    "rate_limit_minute": 600
+  },
+  "usage": {
+    "current_minute": {
+      "requests_made": 7,
+      "requests_left": 593
+    },
+    "current_day": {
+      "credits_used": 30
+    },
+    "current_month": {
+      "credits_used": 196,
+      "credits_left": 449804
+    }
+  }
+}

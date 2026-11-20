@@ -9,7 +9,7 @@ import { SECRET_WARNING_SAVED } from "@/lib/safety/secrets";
 
 /**
  * Evidence summary, built and downloaded entirely in the browser. Nothing is
- * sent to Bagcheck or saved. Any field containing a seed phrase or private key
+ * sent to Covex or saved. Any field containing a seed phrase or private key
  * is cleared immediately and the download is blocked.
  */
 export function EvidencePack({ coin, facts }: { coin: { id: number; name: string; symbol: string } | null; facts: string[] }) {
@@ -39,7 +39,7 @@ export function EvidencePack({ coin, facts }: { coin: { id: number; name: string
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `bagcheck-evidence-${coin?.symbol.toLowerCase() ?? "summary"}-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `covex-evidence-${coin?.symbol.toLowerCase() ?? "summary"}-${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     setDone(true);
@@ -51,7 +51,7 @@ export function EvidencePack({ coin, facts }: { coin: { id: number; name: string
         <IconLock className="mt-1 size-5 shrink-0 text-rescue" />
         <div>
           <h3 className="text-lg font-semibold">Evidence summary</h3>
-          <p className="text-sm text-muted">Built on your device and downloaded as a text file. Nothing you type here is sent to Bagcheck or saved.</p>
+          <p className="text-sm text-muted">Built on your device and downloaded as a text file. Nothing you type here is sent to Covex or saved.</p>
         </div>
       </div>
       <form

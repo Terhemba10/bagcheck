@@ -78,3 +78,30 @@ export const IconRefresh = (p: IconProps) => (
 export const IconExternal = (p: IconProps) => (
   <Base {...p}><path d="M14 4h6v6" /><path d="m20 4-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></Base>
 );
+export const IconHome = (p: IconProps) => (
+  <Base {...p}><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20h5v-6h4v6h5V9.5" /></Base>
+);
+export const IconList = (p: IconProps) => (
+  <Base {...p}><path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" /><circle cx="4.5" cy="12" r="1" /><circle cx="4.5" cy="18" r="1" /></Base>
+);
+export const IconChat = (p: IconProps) => (
+  <Base {...p}><path d="M4 5h16v11H9l-5 4z" /><path d="M8 10h8M8 13h5" /></Base>
+);
+export const IconPlug = (p: IconProps) => (
+  <Base {...p}><path d="M9 3v5M15 3v5" /><path d="M6 8h12v3a6 6 0 0 1-12 0z" /><path d="M12 17v4" /></Base>
+);
+export const IconDatabase = (p: IconProps) => (
+  <Base {...p}><ellipse cx="12" cy="5.5" rx="7.5" ry="2.5" /><path d="M4.5 5.5v6c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-6" /><path d="M4.5 11.5v6c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-6" /></Base>
+);
+export const IconPanelLeft = (p: IconProps) => (
+  <Base {...p}><rect x="3" y="4" width="18" height="16" rx="2.5" /><path d="M9 4v16" /></Base>
+);
+export const IconMenu = (p: IconProps) => (
+  <Base {...p}><path d="M4 7h16M4 12h16M4 17h16" /></Base>
+);
+export const IconX = (p: IconProps) => (
+  <Base {...p}><path d="M6 6l12 12M18 6 6 18" /></Base>
+);
+export const IconCoin = (p: IconProps) => (
+  <Base {...p}><circle cx="12" cy="12" r="8.5" /><path d="M14.5 9.2c-.6-.8-1.5-1.2-2.5-1.2-1.4 0-2.5.8-2.5 2s1.1 1.6 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-1.9-.4-2.5-1.2M12 6.5V8M12 16v1.5" /></Base>
+);

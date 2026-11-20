@@ -37,7 +37,7 @@ export function WatchButton({ coinId, name }: { coinId: number; name: string }) 
         <Link href="/watchlist" className="glass flex min-h-12 w-full items-center justify-center gap-2 rounded-md text-base font-medium text-ok hover:bg-glass-strong">
           <IconCheck className="size-5" /> Watching {name}
         </Link>
-        <p className="text-center text-xs text-faint">Bag re-checks it on a schedule. Get alerts on Telegram from your watchlist.</p>
+        <p className="text-center text-xs text-faint">Covex re-checks it on a schedule. Get alerts on Telegram from your watchlist.</p>
       </div>
     );
   }
@@ -47,7 +47,7 @@ export function WatchButton({ coinId, name }: { coinId: number; name: string }) 
         <IconBell className="size-5" /> {state === "busy" ? "Adding…" : "Watch this coin"}
       </Button>
       <p role={message ? "alert" : undefined} className="text-center text-xs text-faint">
-        {message ?? "No account needed. Bag will re-check it and can alert you on Telegram."}
+        {message ?? "No account needed. Covex will re-check it and can alert you on Telegram."}
       </p>
     </div>
   );

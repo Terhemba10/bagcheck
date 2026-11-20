@@ -1,74 +1,105 @@
 /**
- * Screenshots of every built screen at 1440 and 390 px, saved to design/screens/.
- * Also checks for horizontal page scroll (a spec requirement at 390 px).
+ * Covex screenshots in real Chrome, saved to design/screens/:
+ *   1440 with the sidebar open and collapsed, 1024 (open), 390 (top bar + bottom bar,
+ *   plus the drawer and the command palette open). Also checks for horizontal page scroll.
  *
  *   npx tsx scripts/screenshots.ts                  # against http://localhost:3000
- *   BASE_URL=https://… npx tsx scripts/screenshots.ts
+ *   BASE_URL=http://localhost:3123 npx tsx scripts/screenshots.ts
+ * Report pages are cached server-side, so a run costs 0–8 CMC credits.
  */
-import { chromium } from "@playwright/test";
+import { chromium, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 
 const base = process.env.BASE_URL ?? "http://localhost:3000";
-const pages = (process.env.PAGES ?? "/,/design,/evidence").split(",");
-const widths = [1440, 390];
+const out = "design/screens";
+const PAGES = [
+  ["home", "/"],
+  ["report", "/coin/24478"],
+  ["rescue", "/rescue/24478"],
+  ["watchlist", "/watchlist"],
+  ["alerts", "/alerts"],
+  ["connect", "/connect"],
+] as const;
+
+async function settle(page: Page, path: string) {
+  await page.goto(base + path, { waitUntil: "load", timeout: 90_000 });
+  // reports stream in; wait for the verdict, then for cards to finish assembling
+  if (path.startsWith("/coin/")) await page.getByText("Covex verdict").waitFor();
+  if (path.startsWith("/coin/")) await page.locator("text=/\\d+\\/8 done/").waitFor({ timeout: 60_000 }).catch(() => undefined);
+  await page.waitForTimeout(1800);
+}
 
 async function main() {
-  mkdirSync("design/screens", { recursive: true });
-  const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+  mkdirSync(out, { recursive: true });
+  const browser = await chromium.launch({ channel: "chrome", headless: false, args: ["--window-size=1500,1000"] });
   const problems: string[] = [];
-  for (const w of widths) {
-    const ctx = await browser.newContext({ viewport: { width: w, height: w > 800 ? 900 : 844 }, deviceScaleFactor: 1 });
+  const shot = async (page: Page, name: string, fullPage = false) => {
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (overflow > 0) problems.push(`${name}: horizontal overflow of ${overflow}px`);
+    await page.screenshot({ path: `${out}/${name}.png`, fullPage });
+    console.log(`saved ${out}/${name}.png`);
+  };
+
+  for (const [w, h, label, collapsed] of [
+    [1440, 900, "1440", false],
+    [1440, 900, "1440-collapsed", true],
+    [1024, 768, "1024", false],
+  ] as const) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+    await ctx.addInitScript({ content: `window.__name = (f) => f; try { localStorage.setItem("covex:sidebar", "${collapsed ? "collapsed" : "open"}") } catch {}` });
     const page = await ctx.newPage();
-    for (const p of pages) {
-      // "load", not "networkidle": the dev server's hot-reload socket never goes idle
-      await page.goto(base + p, { waitUntil: "load", timeout: 90_000 });
-      await page.waitForTimeout(2500); // agent mounts after idle
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-      if (overflow > 0) problems.push(`${p} @${w}px: horizontal overflow of ${overflow}px`);
-      const name = (p === "/" ? "home" : p.slice(1).replace(/\//g, "-")) + `-${w}.png`;
-      // Grow the viewport to the full page first and let the 3D canvas redraw: a `fullPage`
-      // capture resizes mid-shot and headless software WebGL leaves the canvas blank.
-      // Very tall pages exceed Chromium's max surface (~8k px) and tile, so those use fullPage.
-      const fullHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-      if (fullHeight <= 7000) {
-        await page.setViewportSize({ width: w, height: fullHeight });
-        await page.waitForTimeout(1500);
-        await page.screenshot({ path: `design/screens/${name}`, animations: "disabled", timeout: 180_000 });
-        await page.setViewportSize({ width: w, height: w > 800 ? 900 : 844 });
-      } else {
-        // save as parts of ≤ 6000 px each (…-part1.png, …-part2.png)
-        const chunk = 6000;
-        await page.setViewportSize({ width: w, height: chunk });
-        for (let i = 0, y = 0; y < fullHeight; i++, y += chunk) {
-          await page.evaluate((top) => window.scrollTo(0, top), y);
-          await page.waitForTimeout(1200);
-          const part = name.replace(".png", `-part${i + 1}.png`);
-          await page.screenshot({ path: `design/screens/${part}`, animations: "disabled", timeout: 180_000 });
-          console.log(`saved design/screens/${part}`);
-        }
-        await page.setViewportSize({ width: w, height: w > 800 ? 900 : 844 });
-        continue;
+    for (const [name, path] of PAGES) {
+      if (collapsed && !["home", "report"].includes(name)) continue;
+      await settle(page, path);
+      await shot(page, `${name}-${label}`);
+    }
+    if (label === "1440") {
+      await settle(page, "/coin/24478");
+      await shot(page, "report-1440-full", true);
+      await page.keyboard.press("Control+k");
+      await page.waitForTimeout(400);
+      await page.keyboard.type("pepe", { delay: 60 });
+      await page.waitForTimeout(1200);
+      await shot(page, "palette-1440");
+      await page.keyboard.press("Escape");
+      if (collapsed === false) {
+        // rail tooltip demo needs the collapsed state; skip here
       }
-      console.log(`saved design/screens/${name}`);
+    }
+    if (label === "1440-collapsed") {
+      await settle(page, "/");
+      await page.getByRole("link", { name: "Watchlist" }).first().hover();
+      await page.waitForTimeout(300);
+      await shot(page, "home-1440-collapsed-tooltip");
     }
     await ctx.close();
   }
-  // 2D fallback proof: home with prefers-reduced-motion (no 3D, static orb)
-  {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
-    const page = await ctx.newPage();
-    await page.goto(base + "/", { waitUntil: "load", timeout: 90_000 });
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: "design/screens/home-390-reduced-motion.png" });
-    console.log("saved design/screens/home-390-reduced-motion.png");
-    await ctx.close();
+
+  // phones
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+  await ctx.addInitScript({ content: "window.__name = (f) => f;" });
+  const page = await ctx.newPage();
+  for (const [name, path] of PAGES) {
+    await settle(page, path);
+    await shot(page, `${name}-390`);
   }
+  await settle(page, "/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.waitForTimeout(500);
+  await shot(page, "drawer-390");
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+  await page.getByRole("button", { name: "Search coins and pages" }).click();
+  await page.waitForTimeout(400);
+  await shot(page, "palette-390");
+  await ctx.close();
 
   await browser.close();
   if (problems.length) {
     console.error("Layout problems:\n" + problems.join("\n"));
-    process.exitCode = 1;
-  } else console.log("No horizontal overflow at any width.");
+    process.exit(1);
+  }
+  console.log("No horizontal overflow.");
 }
 
 main().catch((e) => {

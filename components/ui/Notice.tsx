@@ -35,7 +35,7 @@ export function Notice({
   );
 }
 
-export const DISCLAIMER = "Not financial advice. Bagcheck explains data. It never tells you to buy or sell.";
+export const DISCLAIMER = "Not financial advice. Covex explains data. It never tells you to buy or sell.";
 
 export function Disclaimer({ className }: { className?: string }) {
   return (

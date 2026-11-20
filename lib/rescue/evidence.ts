@@ -44,12 +44,12 @@ export function buildEvidenceText(f: EvidenceFields, coin: { name: string; symbo
   return [
     line,
     "EVIDENCE SUMMARY",
-    `Prepared with Bagcheck on ${now.toISOString().replace("T", " ").slice(0, 16)} UTC`,
+    `Prepared with Covex on ${now.toISOString().replace("T", " ").slice(0, 16)} UTC`,
     coin ? `Coin: ${coin.name} (${coin.symbol}), CoinMarketCap id ${coin.id}` : "Coin: (not specified)",
     line,
     "",
     ...(Object.keys(EVIDENCE_LABELS) as (keyof EvidenceFields)[]).map(section),
-    ...(facts.length ? ["CONTEXT FROM BAGCHECK (live CoinMarketCap data at the time of writing)", ...facts.map((x) => `- ${x}`), ""] : []),
+    ...(facts.length ? ["CONTEXT FROM COVEX (live CoinMarketCap data at the time of writing)", ...facts.map((x) => `- ${x}`), ""] : []),
     "WHERE TO REPORT",
     "- The exchange or app you used (through its official support page or app)",
     "- United States: FBI Internet Crime Complaint Center, https://www.ic3.gov/",
@@ -58,9 +58,9 @@ export function buildEvidenceText(f: EvidenceFields, coin: { name: string; symbo
     "IMPORTANT",
     "- Never share your seed phrase or private key with anyone, including people who offer to help.",
     "- Anyone who guarantees to recover your crypto for an upfront fee is running a scam. Real authorities never charge recovery fees.",
-    "- This summary was created on your device. Bagcheck did not upload or store it.",
+    "- This summary was created on your device. Covex did not upload or store it.",
     "",
-    "Not financial advice. Bagcheck explains data. It never tells you to buy or sell.",
+    "Not financial advice. Covex explains data. It never tells you to buy or sell.",
     "",
   ].join("\n");
 }

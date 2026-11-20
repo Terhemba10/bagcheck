@@ -1,8 +1,8 @@
 {
-  "name": "bagcheck",
+  "name": "covex",
   "version": "0.1.0",
   "private": true,
-  "description": "Bagcheck: did the founders keep their promises, and can you still get out? Built on the CoinMarketCap API.",
+  "description": "Covex: did the founders keep their promises, and can you still get out? Built on the CoinMarketCap API.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
@@ -19,17 +19,13 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.9",
-    "@react-three/fiber": "^9.8.2",
-    "@react-three/postprocessing": "^3.2.2",
     "@scure/bip39": "^2.4.0",
     "@upstash/redis": "^1.41.0",
+    "motion": "14.9.1",
     "next": "^16.4.6",
-    "postprocessing": "^6.39.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "server-only": "^0.0.1",
-    "three": "^0.187.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -38,7 +34,6 @@
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@types/three": "^0.187.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.6",
     "tailwindcss": "^4.3.5",

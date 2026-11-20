@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           status=$(curl -sS -o response.json -w "%{http_code}" --max-time 120 \
-            -X POST "https://bagcheck-azure.vercel.app/api/cron/check?force=${FORCE}" \
+            -X POST "https://covex-ai.vercel.app/api/cron/check?force=${FORCE}" \
             -H "Authorization: Bearer ${CRON_SECRET}")
           cat response.json; echo
           test "$status" = "200"

@@ -125,13 +125,13 @@ export function LessonsSection({ lessons }: { lessons: Lessons }) {
         <p>{lessons.summary}</p>
         {lessons.changes.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-muted">What changed while Bag was watching</h3>
+            <h3 className="text-sm font-semibold text-muted">What changed while Covex was watching</h3>
             <ul className="tabular mt-1 list-disc space-y-1 pl-5 text-sm">{lessons.changes.map((c) => <li key={c}>{c}</li>)}</ul>
           </div>
         )}
         {lessons.timeline.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-muted">Alerts Bag raised</h3>
+            <h3 className="text-sm font-semibold text-muted">Alerts Covex raised</h3>
             <ol className="mt-1 space-y-1 text-sm">
               {lessons.timeline.map((t, i) => (
                 <li key={i} className="flex flex-wrap items-center gap-2">

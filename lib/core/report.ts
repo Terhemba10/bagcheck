@@ -4,6 +4,7 @@ import { getDexPools, getDexSecurity, getInfo, getMarketPairs, getQuotes, type S
 import { CmcError } from "@/lib/cmc/errors";
 import type { CoinInfo, CoinQuote, MarketPairs } from "@/lib/cmc/types";
 import { checkProjectLinks, type LinkCheck } from "./links";
+import { allFromCache, sourceNote, type StepEvent, type StepId } from "./steps";
 import { scoreReport, verdictText, type ScoreResult } from "./score";
 import {
   concentrationSignal,
@@ -85,15 +86,38 @@ const pickOne = <T>(a: Avail<Record<number, T>>, id: number): Avail<T> => {
   return v ? { ...a, value: v } : { status: "error", reason: "CoinMarketCap returned no data for this coin." };
 };
 
-export async function buildReport(id: number, opts: { fresh?: boolean } = {}): Promise<Report> {
+/** Report the outcome of one Avail as a finished step. */
+function stepFor(id: StepId, a: Avail<unknown>): StepEvent {
+  if (a.status === "ok") return { type: "step", id, status: "done", note: sourceNote(a.source) };
+  if (a.status === "plan") return { type: "step", id, status: "blocked", note: "needs a paid CMC plan" };
+  if (a.status === "none") return { type: "step", id, status: "skipped", note: id === "contract" || id === "liquidity" ? "not a token" : "not needed" };
+  return { type: "step", id, status: "failed", note: "no data" };
+}
+
+/**
+ * Build a report. `onStep` receives real progress events (used by the streaming
+ * route to drive the agent activity panel); it never changes the result.
+ */
+export async function buildReport(id: number, opts: { fresh?: boolean; onStep?: (e: StepEvent) => void } = {}): Promise<Report> {
+  const emit = opts.onStep ?? (() => undefined);
+  const track = <T>(sid: StepId, p: Promise<Avail<T>>): Promise<Avail<T>> => {
+    emit({ type: "step", id: sid, status: "running" });
+    return p.then((a) => {
+      emit(stepFor(sid, a));
+      return a;
+    });
+  };
   const key = `report:v3:${id}`; // bump when the report shape or copy changes
   if (!opts.fresh) {
     const cached = await kv().get<Report>(key).catch(() => null);
-    if (cached) return { ...cached, freshness: "cache" };
+    if (cached) {
+      for (const e of allFromCache()) emit(e);
+      return { ...cached, freshness: "cache" };
+    }
   }
 
   // 1. metadata + quotes (coin and Bitcoin in one call)
-  const [infoAll, quotesAll] = await Promise.all([settle(getInfo([id])), settle(getQuotes(id === BTC_ID ? [id] : [id, BTC_ID]))]);
+  const [infoAll, quotesAll] = await Promise.all([track("profile", settle(getInfo([id]))), track("market", settle(getQuotes(id === BTC_ID ? [id] : [id, BTC_ID])))]);
   const info = pickOne<CoinInfo>(infoAll, id);
   const quote = pickOne<CoinQuote>(quotesAll, id);
   const btc = pickOne<CoinQuote>(quotesAll, BTC_ID);
@@ -109,15 +133,25 @@ export async function buildReport(id: number, opts: { fresh?: boolean } = {}): P
   const notToken = { status: "none" as const, reason: `${meta?.name ?? "This coin"} is a native coin, not a token contract, so there's no contract to scan.` };
 
   const [security, pools, pairs, links] = await Promise.all([
-    contract && dexName ? settle(getDexSecurity(dexName, contract)).then(firstItem<DexSecurity>) : Promise.resolve(notToken as Avail<DexSecurity>),
-    contract && dexName
-      ? settle(getDexPools(dexName, contract)).then((a) => (a.status === "ok" ? { ...a, value: (Array.isArray(a.value) ? a.value : []) as DexPool[] } : a))
-      : Promise.resolve({ status: "none" as const, reason: `${meta?.name ?? "This coin"} trades on exchanges, not in DEX pools.` } as Avail<DexPool[]>),
-    settle<MarketPairs>(getMarketPairs(id, 50)),
-    meta?.urls
-      ? checkProjectLinks(meta.urls).then((v) => ({ status: "ok" as const, value: v, source: "live" as const }))
-      : Promise.resolve({ status: "ok" as const, value: [] as LinkCheck[], source: "live" as const }),
+    track(
+      "contract",
+      contract && dexName ? settle(getDexSecurity(dexName, contract)).then(firstItem<DexSecurity>) : Promise.resolve(notToken as Avail<DexSecurity>),
+    ),
+    track(
+      "liquidity",
+      contract && dexName
+        ? settle(getDexPools(dexName, contract)).then((a) => (a.status === "ok" ? { ...a, value: (Array.isArray(a.value) ? a.value : []) as DexPool[] } : a))
+        : Promise.resolve({ status: "none" as const, reason: `${meta?.name ?? "This coin"} trades on exchanges, not in DEX pools.` } as Avail<DexPool[]>),
+    ),
+    track("markets", settle<MarketPairs>(getMarketPairs(id, 50))),
+    track<LinkCheck[]>(
+      "links",
+      meta?.urls
+        ? checkProjectLinks(meta.urls).then((v) => ({ status: "ok" as const, value: v, source: "live" as const }))
+        : Promise.resolve({ status: "ok" as const, value: [] as LinkCheck[], source: "live" as const }),
+    ),
   ]);
+  emit({ type: "step", id: "score", status: "running" });
 
   const signals: Signal[] = [
     dilutionSignal(quote),
@@ -157,6 +191,7 @@ export async function buildReport(id: number, opts: { fresh?: boolean } = {}): P
     generatedAt: new Date().toISOString(),
     freshness: [quote, info].some((a) => a.status === "ok" && a.source === "live") ? "live" : "cache",
   };
+  emit({ type: "step", id: "score", status: "done", note: `${score.scored} of ${score.total} scored` });
   await kv().set(key, report, REPORT_TTL).catch(() => undefined);
   return report;
 }

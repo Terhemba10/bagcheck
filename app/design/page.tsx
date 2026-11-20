@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { AgentPlayground, AgentStateStrip } from "@/components/agent/AgentPlayground";
+import { AgentActivity } from "@/components/agent/AgentActivity";
+import { CovexMark } from "@/components/brand/CovexMark";
 import { LoadingDemo, StateDemos } from "@/components/design/StateDemos";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -16,17 +17,27 @@ import type { Level } from "@/components/ui/status";
 export const metadata: Metadata = { title: "Design system" };
 
 const COLORS = [
-  ["bg", "#070B18", "Page"],
-  ["bg-raised", "#0C1328", "Panels"],
-  ["text", "#E9EEF9", "Body · 16.9:1"],
-  ["muted", "#A3B0CC", "Secondary · 9.0:1"],
-  ["faint", "#7C89A6", "Captions · 5.6:1"],
-  ["teal", "#3EE6C8", "Brand · 12.5:1"],
-  ["ok", "#4ADE80", "Low concern · 11.3:1"],
-  ["warn", "#FBBF24", "Medium · 11.8:1"],
-  ["danger", "#FF8094", "High · 8.2:1"],
-  ["rescue", "#7AB2FF", "Rescue · 9.0:1"],
-  ["info", "#B49CFF", "Recorded demo · 8.5:1"],
+  ["bg", "#000000", "Page"],
+  ["surface-1", "#0A0A0A", "Sidebar, cards"],
+  ["surface-2", "#111111", "Inputs, raised"],
+  ["surface-3", "#161616", "Tooltips, menus"],
+  ["text", "#EDEDED", "Body · 17.9:1"],
+  ["muted", "#A1A1A1", "Secondary · 8.1:1"],
+  ["faint", "#8B8B8B", "Captions · 6.2:1"],
+  ["teal", "#3EE6C8", "The one accent · 13.4:1"],
+  ["ok", "#4ADE80", "Low concern · 12.1:1"],
+  ["warn", "#FBBF24", "Medium · 12.6:1"],
+  ["danger", "#FF8094", "High · 8.8:1"],
+  ["rescue", "#7AB2FF", "Rescue · 9.6:1"],
+  ["info", "#B49CFF", "Recorded demo · 9.1:1"],
+] as const;
+
+const TONES = [
+  ["idle", "Ready"],
+  ["low", "Low concern"],
+  ["medium", "Medium concern"],
+  ["high", "High concern"],
+  ["rescue", "Rescue"],
 ] as const;
 
 const LEVEL_LIST: Level[] = ["ok", "watch", "concern", "danger", "unknown", "rescue"];
@@ -51,20 +62,44 @@ export default function DesignPage() {
     <div className="space-y-12">
       <header className="space-y-3">
         <p className="text-xs font-medium tracking-wide text-teal uppercase">Living style guide</p>
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Bagcheck design system</h1>
+        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Covex design system</h1>
         <p className="max-w-2xl text-lg text-muted">
-          Tokens, components and Bag, the agent, rendered from the real code. The spec lives in{" "}
+          Tokens, components and the Covex mark, rendered from the real code. The spec lives in{" "}
           <code className="rounded bg-glass-strong px-1.5 py-0.5 font-mono text-sm">design/DESIGN_SPEC.md</code>. Example numbers
           on this page are made up to show the components.
         </p>
       </header>
 
-      <Section id="agent" title="Bag, the agent" intro="One calm assistant across the app. Pick a state. The hero uses 3D on capable devices; the 2D orb is the fallback and the corner agent.">
-        <AgentPlayground />
-        <AgentStateStrip />
+      <Section id="agent" title="The Covex mark and agent activity" intro="An open hexagon (a convex hull) holding a core. The core takes the verdict colour and breathes while Covex works. The activity panel lists each real step with its data source.">
+        <ul className="flex flex-wrap gap-4">
+          {TONES.map(([tone, label]) => (
+            <li key={tone} className="glass flex w-36 flex-col items-center gap-3 rounded-lg p-5 text-center">
+              <CovexMark size={56} tone={tone} />
+              <span className="text-sm">{label}</span>
+            </li>
+          ))}
+          <li className="glass flex w-36 flex-col items-center gap-3 rounded-lg p-5 text-center">
+            <CovexMark size={56} working />
+            <span className="text-sm">Working</span>
+          </li>
+        </ul>
+        <AgentActivity
+          className="max-w-md"
+          elapsedMs={null}
+          steps={[
+            { id: "profile", status: "done", note: "live" },
+            { id: "market", status: "done", note: "cached" },
+            { id: "contract", status: "done", note: "live" },
+            { id: "liquidity", status: "running" },
+            { id: "markets", status: "blocked", note: "needs a paid CMC plan" },
+            { id: "links", status: "pending" },
+            { id: "score", status: "pending" },
+            { id: "roadmap", status: "pending" },
+          ]}
+        />
       </Section>
 
-      <Section id="color" title="Colour" intro="Dark navy with glass surfaces. Contrast ratios are computed against the page background (WCAG 2.x).">
+      <Section id="color" title="Colour" intro="Pure black with near-black surfaces and 1px borders; one accent plus status colours. Contrast ratios are computed against #000 (WCAG 2.2).">
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {COLORS.map(([name, hex, use]) => (
             <li key={name} className="glass overflow-hidden rounded-lg">
@@ -168,7 +203,7 @@ export default function DesignPage() {
           </Notice>
           <Notice tone="warn" title="Monitoring paused to save API credits">Reports still work. Watchlist checks resume when credits reset.</Notice>
           <Notice tone="info" title="Recorded data">Recorded from the live CMC API on 19 Nov 2026. This data needs a paid plan, so it isn&apos;t live right now.</Notice>
-          <Notice tone="danger" title="Never share your seed phrase">Bagcheck will never ask for it. If you pasted one anywhere, move your funds to a new wallet.</Notice>
+          <Notice tone="danger" title="Never share your seed phrase">Covex will never ask for it. If you pasted one anywhere, move your funds to a new wallet.</Notice>
           <Disclaimer />
         </div>
       </Section>

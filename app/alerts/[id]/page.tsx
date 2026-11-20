@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarkDelivered } from "@/components/watch/MarkDelivered";
 import { BeforeAfterChart } from "@/components/watch/BeforeAfterChart";
-import { Agent2D } from "@/components/agent/Agent2D";
+import { CovexMark } from "@/components/brand/CovexMark";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Disclaimer } from "@/components/ui/Notice";
 import { StatusPill } from "@/components/ui/StatusPill";
@@ -28,7 +28,7 @@ export default async function AlertPage({ params }: { params: Promise<{ id: stri
   return (
     <article className="mx-auto max-w-3xl space-y-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <Agent2D state={a.severity === "danger" ? "danger" : "concern"} size={88} />
+        <span className="grid size-16 shrink-0 place-items-center rounded-2xl border border-line bg-surface-1"><CovexMark size={40} tone={a.severity === "danger" ? "high" : "medium"} /></span>
         <div className="space-y-2">
           <StatusPill level={a.severity} />
           <h1 className="text-3xl font-semibold tracking-tight">{a.title}</h1>

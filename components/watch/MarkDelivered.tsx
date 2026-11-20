@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { IconCheck } from "@/components/ui/icons";
 
-/** Your own note that a promise was delivered: Bag stops reminding you about it. */
+/** Your own note that a promise was delivered: Covex stops reminding you about it. */
 export function MarkDelivered({ coinId, quote }: { coinId: number; quote: string }) {
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -20,7 +20,7 @@ export function MarkDelivered({ coinId, quote }: { coinId: number; quote: string
   if (done) {
     return (
       <p className="flex items-center gap-2 text-sm text-ok">
-        <IconCheck className="size-4" /> Marked as delivered. Bag won&apos;t remind you about this promise again.
+        <IconCheck className="size-4" /> Marked as delivered. Covex won&apos;t remind you about this promise again.
       </p>
     );
   }

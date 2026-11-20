@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Agent2D } from "@/components/agent/Agent2D";
+import { CovexMark } from "@/components/brand/CovexMark";
 import { Button } from "./Button";
 import { IconLock, IconRefresh } from "./icons";
 import { SkeletonCard } from "./Skeleton";
@@ -30,7 +30,7 @@ export function StateView({
     return (
       <div role="status" aria-live="polite" className="space-y-6">
         <div className="flex flex-col items-center gap-3 py-4">
-          <Agent2D state="scanning" size={120} />
+          <CovexMark size={48} working />
           <p className="text-sm text-muted">{message ?? "Checking supply… reading the roadmap…"}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -44,14 +44,14 @@ export function StateView({
 
   const copy = {
     empty: { t: title ?? "Nothing here yet", m: message ?? "Check a coin to get started.", agent: "idle" as const },
-    error: { t: title ?? "Something went wrong on our side", m: message ?? "Your data is safe. Please try again.", agent: "concern" as const },
+    error: { t: title ?? "Something went wrong on our side", m: message ?? "Your data is safe. Please try again.", agent: "medium" as const },
     "rate-limited": { t: title ?? "CoinMarketCap is busy", m: message ?? "We've hit the API's per-minute limit. Please try again in a minute.", agent: "idle" as const },
     "plan-blocked": { t: title ?? "Needs a paid CoinMarketCap plan", m: message ?? "This part isn't available live on the current API plan.", agent: "idle" as const },
   }[kind];
 
   return (
     <div role={kind === "error" ? "alert" : "status"} className="glass flex flex-col items-center gap-4 rounded-lg px-6 py-10 text-center">
-      {kind === "plan-blocked" ? <IconLock className="size-10 text-faint" /> : <Agent2D state={copy.agent} size={96} />}
+      {kind === "plan-blocked" ? <IconLock className="size-10 text-faint" /> : <CovexMark size={48} tone={copy.agent} />}
       <div className="space-y-1">
         <p className="text-lg font-semibold">{copy.t}</p>
         <p className="max-w-md text-sm text-muted">{copy.m}</p>

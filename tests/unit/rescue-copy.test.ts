@@ -29,7 +29,7 @@ describe("rescue plan wording", () => {
   it("only hard-codes https links that are on the allowlist (plus our own site)", () => {
     const urls = [...source.matchAll(/https:\/\/[^\s"'`)<>]+/g)].map((m) => m[0].replace(/[.,]$/, ""));
     for (const u of urls) {
-      if (u.startsWith("https://bagcheck-azure.vercel.app")) continue;
+      if (u.startsWith("https://covex-ai.vercel.app")) continue;
       expect(isOfficial(u), u).toBe(true);
     }
   });

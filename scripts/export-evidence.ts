@@ -1,8 +1,8 @@
 /**
- * Writes docs/API_EVIDENCE.md from a running Bagcheck instance.
+ * Writes docs/API_EVIDENCE.md from a running Covex instance.
  *
  *   npm run evidence:export                       # http://localhost:3000
- *   BASE_URL=https://bagcheck.vercel.app npm run evidence:export
+ *   BASE_URL=https://covex-ai.vercel.app npm run evidence:export
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 
@@ -36,7 +36,7 @@ async function main() {
   const lines = [
     "# API evidence",
     "",
-    `Real CoinMarketCap API calls made by Bagcheck, exported ${new Date().toISOString()} from ${base}/evidence.`,
+    `Real CoinMarketCap API calls made by Covex, exported ${new Date().toISOString()} from ${base}/evidence.`,
     "Responses are trimmed (arrays cut to 3 items). The API key is sent only as a server-side header and is never logged.",
     "",
     "| Endpoint | Time (UTC) | HTTP | Credits | CMC elapsed |",

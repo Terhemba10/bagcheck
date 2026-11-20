@@ -1,5 +1,5 @@
 // Smoke test: start the built MCP server over stdio, list its tools and call
-// each one against the live Bagcheck API (--offline: tools list and the
+// each one against the live Covex API (--offline: tools list and the
 // secret blocker only). Costs a few CMC credits (cached
 // reports cost 0). Usage: npm run build && npm run smoke
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -9,13 +9,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const DISCLAIMER = "Not financial advice.";
-const home = mkdtempSync(join(tmpdir(), "bagcheck-mcp-smoke-"));
+const home = mkdtempSync(join(tmpdir(), "covex-mcp-smoke-"));
 const transport = new StdioClientTransport({
   command: process.execPath,
   args: [new URL("../dist/index.js", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")],
-  env: { ...process.env, BAGCHECK_MCP_HOME: home },
+  env: { ...process.env, COVEX_MCP_HOME: home },
 });
-const client = new Client({ name: "bagcheck-smoke", version: "0.0.1" });
+const client = new Client({ name: "covex-smoke", version: "0.0.1" });
 await client.connect(transport);
 
 let failed = 0;

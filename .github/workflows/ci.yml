@@ -54,11 +54,11 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Build
         run: npm run build
-      - name: Committed bagcheck-mcp.tgz matches the source
+      - name: Committed covex-mcp.tgz matches the source
         run: |
-          mkdir -p /tmp/pkg && tar -xzf bagcheck-mcp.tgz -C /tmp/pkg
+          mkdir -p /tmp/pkg && tar -xzf covex-mcp.tgz -C /tmp/pkg
           if ! cmp -s /tmp/pkg/package/dist/index.js dist/index.js; then
-            echo "::error::mcp/bagcheck-mcp.tgz is out of date. Run 'npm run pack' in mcp/ and commit it."
+            echo "::error::mcp/covex-mcp.tgz is out of date. Run 'npm run pack' in mcp/ and commit it."
             exit 1
           fi
       - name: Offline smoke (lists tools, refuses a seed phrase; no API calls)

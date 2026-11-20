@@ -112,7 +112,7 @@ let instance: KV | null = null;
 // Next.js can load this module more than once per process (pages and route
 // handlers are bundled separately), so the in-memory store lives on globalThis
 // to keep one shared copy.
-const g = globalThis as unknown as { __bagcheckMemoryKV?: MemoryKV };
+const g = globalThis as unknown as { __covexMemoryKV?: MemoryKV };
 
 /** Upstash's own variable names, or the ones Vercel's Upstash integration sets. */
 function redisEnv() {
@@ -126,7 +126,7 @@ export function kv(): KV {
   if (instance) return instance;
   const { url, token } = redisEnv();
   if (url && token) instance = new UpstashKV(new Redis({ url, token }));
-  else instance = g.__bagcheckMemoryKV ??= new MemoryKV();
+  else instance = g.__covexMemoryKV ??= new MemoryKV();
   return instance;
 }
 

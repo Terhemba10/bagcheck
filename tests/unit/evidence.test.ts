@@ -29,13 +29,13 @@ describe("evidence pack", () => {
   it("contains the coin, every section, where to report, the shield and the disclaimer", () => {
     const t = buildEvidenceText({ ...EMPTY_EVIDENCE, whatHappened: "Approved a fake airdrop site." }, COIN, NOW, ["Low concern"]);
     expect(t).toContain("Coin: Pepe (PEPE), CoinMarketCap id 24478");
-    expect(t).toContain("Prepared with Bagcheck on 2026-11-20 09:30 UTC");
+    expect(t).toContain("Prepared with Covex on 2026-11-20 09:30 UTC");
     expect(t).toContain("WHAT HAPPENED\nApproved a fake airdrop site.");
     expect(t).toContain("TRANSACTION HASHES\n(not provided)");
     expect(t).toContain("https://www.ic3.gov/");
     expect(t).toContain("Your local police cybercrime unit");
     expect(t).toContain("Anyone who guarantees to recover your crypto for an upfront fee is running a scam.");
-    expect(t).toContain("Bagcheck did not upload or store it.");
+    expect(t).toContain("Covex did not upload or store it.");
     expect(t.trim().endsWith("It never tells you to buy or sell.")).toBe(true);
   });
 });

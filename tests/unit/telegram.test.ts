@@ -42,7 +42,7 @@ describe("messages", () => {
   });
   it("every alert and the help/rescue texts end with the disclaimer", () => {
     for (const t of [formatAlert(alert), HELP_TEXT, RESCUE_TEXT]) {
-      expect(t).toContain("Not financial advice. Bagcheck explains data. It never tells you to buy or sell.");
+      expect(t).toContain("Not financial advice. Covex explains data. It never tells you to buy or sell.");
     }
   });
   it("links to the alert evidence and the report", () => {
@@ -53,9 +53,9 @@ describe("messages", () => {
   it("the rescue text uses the exact shield wording and warns about fake revoke sites", () => {
     expect(RESCUE_TEXT).toContain("Anyone who guarantees to recover your crypto for an upfront fee is running a scam. Real authorities never charge recovery fees.");
     expect(RESCUE_TEXT).toMatch(/fake "revoke" sites/);
-    expect(RESCUE_TEXT).toContain('href="https://bagcheck-azure.vercel.app/rescue"');
+    expect(RESCUE_TEXT).toContain('href="https://covex-ai.vercel.app/rescue"');
   });
   it("/rescue <coin> links to that coin's rescue page", () => {
-    expect(rescueText({ id: 24478, name: "Pepe" })).toContain("https://bagcheck-azure.vercel.app/rescue/24478");
+    expect(rescueText({ id: 24478, name: "Pepe" })).toContain("https://covex-ai.vercel.app/rescue/24478");
   });
 });

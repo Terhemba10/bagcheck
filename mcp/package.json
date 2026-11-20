@@ -1,11 +1,11 @@
 {
-  "name": "bagcheck-mcp",
+  "name": "covex-mcp",
   "version": "0.1.0",
-  "description": "MCP server for Bagcheck: plain-English crypto risk reports, promise checks, watchlist alerts and rescue plans, built on live CoinMarketCap data.",
+  "description": "MCP server for Covex: plain-English crypto risk reports, promise checks, watchlist alerts and rescue plans, built on live CoinMarketCap data.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "bagcheck-mcp": "dist/index.js"
+    "covex-mcp": "dist/index.js"
   },
   "files": [
     "dist",
@@ -15,7 +15,7 @@
     "build": "node build.mjs",
     "start": "node dist/index.js",
     "smoke": "node scripts/smoke.mjs",
-    "pack": "npm run build && npm pack --silent && node -e \"require('fs').renameSync('bagcheck-mcp-'+require('./package.json').version+'.tgz','bagcheck-mcp.tgz')\"",
+    "pack": "npm run build && npm pack --silent && node -e \"require('fs').renameSync('covex-mcp-'+require('./package.json').version+'.tgz','covex-mcp.tgz')\"",
     "check:npx": "node scripts/npx-check.mjs"
   },
   "engines": {
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Terhemba10/bagcheck",
+    "url": "https://github.com/Terhemba10/covex",
     "directory": "mcp"
   }
 }

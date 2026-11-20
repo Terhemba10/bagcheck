@@ -15,7 +15,7 @@ interface Payload {
 }
 
 /**
- * "Coins worth a check": fills the space under Bag on desktop.
+ * "Coins worth a check": top-200 coins with a warning sign worth a look.
  * Startup key: CMC trending. Basic key: our own warning-sign rules over
  * listings/latest. Labelled honestly either way.
  */
@@ -49,7 +49,7 @@ export function WorthACheckRow({ className }: { className?: string }) {
           </p>
         )}
       </div>
-      <ul className="grid gap-2 sm:grid-cols-2">
+      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {!data &&
           Array.from({ length: 4 }, (_, i) => (
             <li key={i} className="glass rounded-lg p-3" aria-hidden="true">

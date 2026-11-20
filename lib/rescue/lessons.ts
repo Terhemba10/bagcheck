@@ -1,6 +1,6 @@
 /**
  * "Lessons for next time": which warning signs appeared and when, from
- * Bagcheck's own snapshots and alerts. Pure, unit-tested. Dates only ever come
+ * Covex's own snapshots and alerts. Pure, unit-tested. Dates only ever come
  * from snapshots/alerts that exist: never guessed. When there's no history,
  * it says so.
  */
@@ -15,7 +15,7 @@ export interface Lessons {
   summary: string;
   /** What changed between the first and last check (only measured values). */
   changes: string[];
-  /** Alerts Bag raised, oldest first, with their real dates. */
+  /** Alerts Covex raised, oldest first, with their real dates. */
   timeline: { at: string; title: string; severity: Alert["severity"] }[];
   /** Warning signs in today's report (no dates: they're as of now). */
   signsToday: { title: string; meaning: string }[];
@@ -50,8 +50,8 @@ export function lessonsFrom(input: { snapshots: Snapshot[]; alerts: Alert[]; rep
       hasHistory: false,
       summary:
         snaps.length === 1
-          ? `Bag has only checked ${input.report.coin.name} once (on ${day(snaps[0]!.at)}), so there isn't enough history to show what changed over time yet.`
-          : `Bag hasn't been watching ${input.report.coin.name}, so there's no history to show when warning signs appeared. Today's report is below; watching the coin starts a history.`,
+          ? `Covex has only checked ${input.report.coin.name} once (on ${day(snaps[0]!.at)}), so there isn't enough history to show what changed over time yet.`
+          : `Covex hasn't been watching ${input.report.coin.name}, so there's no history to show when warning signs appeared. Today's report is below; watching the coin starts a history.`,
       changes: [],
       timeline,
       signsToday,
@@ -79,7 +79,7 @@ export function lessonsFrom(input: { snapshots: Snapshot[]; alerts: Alert[]; rep
 
   return {
     hasHistory: true,
-    summary: `Bag checked ${input.report.coin.name} ${snaps.length} times between ${day(first.at)} and ${day(last.at)}.${timeline.length ? ` It raised ${timeline.length} alert${timeline.length === 1 ? "" : "s"} in that time.` : " No alerts were raised in that time."}`,
+    summary: `Covex checked ${input.report.coin.name} ${snaps.length} times between ${day(first.at)} and ${day(last.at)}.${timeline.length ? ` It raised ${timeline.length} alert${timeline.length === 1 ? "" : "s"} in that time.` : " No alerts were raised in that time."}`,
     changes,
     timeline,
     signsToday,

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Agent } from "@/components/agent/Agent";
+import { CovexMark } from "@/components/brand/CovexMark";
+import { agent } from "@/lib/client/agentStore";
 import { Disclaimer } from "@/components/ui/Notice";
 import { StateView } from "@/components/ui/StateView";
 import type { Rescue } from "@/lib/rescue/build";
@@ -35,8 +36,16 @@ export function RescueView({ id }: { id: number }) {
   const [load, setLoad] = useState<Load>({ s: "loading" });
   useEffect(() => {
     const ctrl = new AbortController();
-    loadRescue(id, ctrl.signal).then((n) => n && setLoad(n));
-    return () => ctrl.abort();
+    agent.start();
+    loadRescue(id, ctrl.signal).then((n) => {
+      if (!n) return;
+      setLoad(n);
+      agent.finish("rescue");
+    });
+    return () => {
+      ctrl.abort();
+      agent.reset();
+    };
   }, [id]);
   const retry = () => {
     setLoad({ s: "loading" });
@@ -46,9 +55,12 @@ export function RescueView({ id }: { id: number }) {
   const r = load.s === "ok" ? load.r : null;
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
-      {/* Bag as a calm guide beside the steps */}
-      <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start" aria-label="Rescue steps">
-        <Agent state="rescue" size={240} caption={r ? "Let's take this one step at a time." : "Gathering where it can still be traded…"} />
+      {/* a calm guide beside the steps (no tilt, slower motion on rescue pages) */}
+      <aside className="space-y-5 lg:sticky lg:top-8 lg:self-start" aria-label="Rescue steps">
+        <div className="flex items-center gap-3 rounded-xl border border-line bg-surface-1 p-4">
+          <CovexMark size={36} tone="rescue" working={!r && load.s === "loading"} />
+          <p className="text-sm text-muted">{r ? "Let's take this one step at a time." : "Gathering where it can still be traded…"}</p>
+        </div>
         <nav aria-label="Steps" className="hidden lg:block">
           <ol className="space-y-1 text-sm">
             {STEPS.map((s, i) => (
@@ -68,7 +80,7 @@ export function RescueView({ id }: { id: number }) {
           <p className="text-xs font-medium tracking-wide text-rescue uppercase">Rescue plan</p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{r ? `${r.coin.name} (${r.coin.symbol})` : "Loading…"}</h1>
           <p className="text-muted">
-            If something went wrong, here&apos;s where things stand and what you can do. Bag explains the options; you decide.{" "}
+            If something went wrong, here&apos;s where things stand and what you can do. Covex explains the options; you decide.{" "}
             {r && (
               <Link href={`/coin/${r.coin.id}`} className="text-teal hover:underline">
                 See the full report

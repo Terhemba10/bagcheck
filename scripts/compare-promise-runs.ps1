@@ -5,7 +5,7 @@
 param([int]$CoinId = 38849, [int]$Runs = 3, [int]$Port = 3124)
 
 $ErrorActionPreference = "Stop"
-$out = Join-Path $env:TEMP "bagcheck-promise-runs"
+$out = Join-Path $env:TEMP "covex-promise-runs"
 New-Item -ItemType Directory -Force $out | Out-Null
 
 function Stop-Port([int]$p) {

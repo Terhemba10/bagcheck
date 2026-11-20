@@ -13,7 +13,7 @@ export function ConnectTelegram({ linked = false }: { linked?: boolean }) {
   if (linked) {
     return (
       <p className="flex items-center gap-2 text-sm text-ok">
-        <IconCheck className="size-4" /> Telegram is connected: alerts for your watchlist go to your chat with Bag.
+        <IconCheck className="size-4" /> Telegram is connected: alerts for your watchlist go to your chat with Covex.
       </p>
     );
   }
@@ -44,7 +44,7 @@ export function ConnectTelegram({ linked = false }: { linked?: boolean }) {
         </div>
       )}
       {error && <p role="alert" className="text-sm text-warn">{error}</p>}
-      <p className="text-xs text-faint">Bag only sends alerts for coins you watch. It will never ask for your seed phrase or private key.</p>
+      <p className="text-xs text-faint">Covex only sends alerts for coins you watch. It will never ask for your seed phrase or private key.</p>
     </div>
   );
 }

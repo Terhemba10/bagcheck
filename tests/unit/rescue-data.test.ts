@@ -39,7 +39,7 @@ describe("lessons for next time", () => {
       report,
     });
     expect(l.hasHistory).toBe(true);
-    expect(l.summary).toBe("Bag checked Test 2 times between 10 Nov 2026 and 20 Nov 2026. It raised 1 alert in that time.");
+    expect(l.summary).toBe("Covex checked Test 2 times between 10 Nov 2026 and 20 Nov 2026. It raised 1 alert in that time.");
     expect(l.changes).toEqual([
       "Price: -50.0% ($1.00 → $0.500)",
       "24h volume: -60.0% ($1.0M → $400.0K)",

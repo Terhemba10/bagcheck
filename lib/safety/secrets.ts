@@ -2,7 +2,7 @@
  * Seed-phrase and private-key blocker. Pure, unit-tested, used in the browser
  * (so secrets are never sent) and again on the server.
  *
- * Bagcheck never asks for, accepts, stores or logs these.
+ * Covex never asks for, accepts, stores or logs these.
  */
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 
@@ -16,7 +16,7 @@ export interface SecretHit {
 }
 
 const SECRET_ADVICE =
-  "Never share it with anyone: Bagcheck, support staff and real authorities will never ask for it. If you've already shared it, move your funds to a new wallet with a new seed phrase.";
+  "Never share it with anyone: Covex, support staff and real authorities will never ask for it. If you've already shared it, move your funds to a new wallet with a new seed phrase.";
 
 /** For things that would be sent (chat, Telegram). */
 export const SECRET_WARNING = `That looks like a seed phrase or private key, so it wasn't sent. ${SECRET_ADVICE}`;

@@ -1,5 +1,5 @@
 /**
- * "Ask Bag": the facts the AI may use, and the checks its answer must pass.
+ * "Ask Covex": the facts the AI may use, and the checks its answer must pass.
  * Pure, unit-tested.
  */
 import type { Report } from "@/lib/core/report";
@@ -19,7 +19,7 @@ export function buildFacts(r: Report, promises: PromiseCheck | null): string {
   ];
   if (promises) {
     if (promises.promises.length) {
-      lines.push("Promises found on the project's own pages (status computed by Bagcheck; 'overdue' only means the date passed):");
+      lines.push("Promises found on the project's own pages (status computed by Covex; 'overdue' only means the date passed):");
       for (const p of promises.promises) lines.push(`- ${p.dueDate ?? "no date"} [${p.status}]: ${p.promise} (quote: "${p.quote}")`);
     } else lines.push(`Promise check: ${promises.emptyReason ?? "no commitments found"}`);
   } else lines.push("Promise check: not run yet for this coin.");

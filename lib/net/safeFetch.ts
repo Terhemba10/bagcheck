@@ -15,7 +15,7 @@ export const SAFE_FETCH = {
   timeoutMs: 6000,
   maxRedirects: 4,
   maxBytes: 1_500_000,
-  userAgent: "BagcheckBot/1.0 (+https://bagcheck-azure.vercel.app; checks public project pages)",
+  userAgent: "CovexBot/1.0 (+https://covex-ai.vercel.app; checks public project pages)",
 };
 
 export class UnsafeUrlError extends Error {

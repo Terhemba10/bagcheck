@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getApiStatus } from "@/lib/cmc/status";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "API evidence · Bagcheck" };
+export const metadata: Metadata = { title: "API evidence · Covex" };
 
 const CAP_LABEL = {
   available: { icon: "✓", text: "Works on this key", cls: "text-ok" },
@@ -27,7 +27,7 @@ export default async function EvidencePage() {
       <header className="space-y-3">
         <h1 className="text-3xl font-semibold tracking-tight">API evidence</h1>
         <p className="max-w-2xl text-muted">
-          Real calls Bagcheck made to the CoinMarketCap API: which endpoint, when, how many credits it used, and a
+          Real calls Covex made to the CoinMarketCap API: which endpoint, when, how many credits it used, and a
           trimmed copy of the response. All calls go through our server. The API key never reaches your browser and is
           never shown here.
         </p>
@@ -65,7 +65,7 @@ export default async function EvidencePage() {
 
       <section aria-labelledby="endpoints" className="space-y-3">
         <h2 id="endpoints" className="text-xl font-semibold">
-          Endpoints Bagcheck uses
+          Endpoints Covex uses
         </h2>
         {/* phones: stacked rows */}
         <ul className="space-y-2 md:hidden">

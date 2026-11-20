@@ -1,32 +1,43 @@
 /**
- * Thin client for Bagcheck's public API. The MCP server holds no API keys:
+ * Thin client for Covex's public API. The MCP server holds no API keys:
  * it uses the same endpoints, rate limits and credit guard as the website.
  *
  * Watchlist identity: an anonymous id (like the website's cookie), stored in
- * ~/.bagcheck/mcp.json so the assistant keeps the same watchlist between runs.
+ * ~/.covex/mcp.json so the assistant keeps the same watchlist between runs.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-export const BASE_URL = (process.env.BAGCHECK_URL ?? "https://bagcheck-azure.vercel.app").replace(/\/+$/, "");
-const STATE_DIR = process.env.BAGCHECK_MCP_HOME ?? join(homedir(), ".bagcheck");
+// BAGCHECK_* and ~/.bagcheck are the names from before the rename to Covex; still honoured.
+export const BASE_URL = (process.env.COVEX_URL ?? process.env.BAGCHECK_URL ?? "https://covex-ai.vercel.app").replace(/\/+$/, "");
+const STATE_DIR = process.env.COVEX_MCP_HOME ?? process.env.BAGCHECK_MCP_HOME ?? join(homedir(), ".covex");
 const STATE_FILE = join(STATE_DIR, "mcp.json");
+const LEGACY_STATE_FILE = join(homedir(), ".bagcheck", "mcp.json");
 const UID_RE = /^[a-f0-9]{32}$/;
 
-function readUid(): string | null {
+function readUidFrom(file: string): string | null {
   try {
-    const uid = (JSON.parse(readFileSync(STATE_FILE, "utf8")) as { uid?: string }).uid;
+    const uid = (JSON.parse(readFileSync(file, "utf8")) as { uid?: string }).uid;
     return uid && UID_RE.test(uid) ? uid : null;
   } catch {
     return null;
   }
 }
 
+/** The saved watchlist id; an id saved before the rename is moved to ~/.covex. */
+function readUid(): string | null {
+  const uid = readUidFrom(STATE_FILE);
+  if (uid) return uid;
+  const legacy = readUidFrom(LEGACY_STATE_FILE);
+  if (legacy) saveUid(legacy);
+  return legacy;
+}
+
 function saveUid(uid: string) {
   try {
     mkdirSync(STATE_DIR, { recursive: true });
-    writeFileSync(STATE_FILE, JSON.stringify({ uid, note: "Anonymous Bagcheck watchlist id. Delete this file to start a new watchlist." }, null, 2));
+    writeFileSync(STATE_FILE, JSON.stringify({ uid, note: "Anonymous Covex watchlist id. Delete this file to start a new watchlist." }, null, 2));
   } catch {
     /* read-only home: the watchlist lasts for this session only */
   }
@@ -44,7 +55,7 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(path: string, init: { method?: "GET" | "POST" | "DELETE"; body?: unknown; withUid?: boolean } = {}): Promise<T> {
-  const headers: Record<string, string> = { Accept: "application/json", "User-Agent": "bagcheck-mcp/0.1" };
+  const headers: Record<string, string> = { Accept: "application/json", "User-Agent": "covex-mcp/0.1" };
   const uid = init.withUid ? (sessionUid ?? readUid()) : null;
   if (uid) headers.Cookie = `bc_uid=${uid}`;
   if (init.body !== undefined) headers["Content-Type"] = "application/json";
@@ -63,7 +74,7 @@ export async function api<T>(path: string, init: { method?: "GET" | "POST" | "DE
   }
   const json = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
   if (!res.ok) {
-    const msg = json?.error?.message ?? (res.status === 429 ? "Bagcheck is busy right now. Please try again in a minute." : `Bagcheck returned HTTP ${res.status}.`);
+    const msg = json?.error?.message ?? (res.status === 429 ? "Covex is busy right now. Please try again in a minute." : `Covex returned HTTP ${res.status}.`);
     throw new ApiError(res.status, msg);
   }
   return json as T;

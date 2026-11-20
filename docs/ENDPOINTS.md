@@ -1,11 +1,11 @@
-# CMC endpoints used by Bagcheck
+# CMC endpoints used by Covex
 
 Checked with live calls on **19 Nov 2026**. The key reported its plan through `GET /v1/key/info`: **Basic tier, 15,000 credits/month, 50 calls/min**, monthly reset on 1 Dec 2026.
 The full request/response log is in [`API_EVIDENCE.md`](API_EVIDENCE.md), and live on the `/evidence` page.
 
 Legend: ✅ works on this key · ⛔ `1006` plan not authorized · ⚠️ reachable but not yet working
 
-| Endpoint | Status (Basic key) | Credits seen | What Bagcheck uses it for |
+| Endpoint | Status (Basic key) | Credits seen | What Covex uses it for |
 |---|---|---|---|
 | `GET /v1/cryptocurrency/map` | ✅ | 0 | Search: name / symbol / slug → CMC id (compact copy cached 24 h) |
 | `GET /v2/cryptocurrency/info` | ✅ | 1 | Official website, whitepaper, socials, explorers, `date_added`, `date_launched`, contract addresses per chain; lookup by contract address |
@@ -23,14 +23,27 @@ Legend: ✅ works on this key · ⛔ `1006` plan not authorized · ⚠️ reacha
 | `GET /v1/cryptocurrency/trending/most-visited` | not called yet (Startup+ per docs) | — | Home "coins worth a check" |
 | `GET /v1/dex/token-liquidity/query` | ⚠️ HTTP 400 "Parameter error" | 0 | Planned: DEX liquidity history. No documented parameter combination worked (see API_FEEDBACK.md). Fallback: our own snapshots of `token/pools` liquidity |
 
-**Two docs-vs-reality mismatches:** `market-pairs/latest` and `price-performance-stats/latest` are documented as "Basic and up", but a live Basic key gets `1006`. Bagcheck learns this at runtime (`lib/cmc/capabilities.ts`), so the same code works on Basic and Startup without changes.
+## Plan upgrade (20 Nov 2026)
+
+`/v1/key/info` changed during the day: **450,000 credits/month, 600 calls/min** (it was 15,000 and 50 that morning). CMC doesn't return a plan name, so Covex shows "Paid plan". One small live call per formerly blocked endpoint (`scripts/plan-upgrade.ts`, 3 credits):
+
+| Endpoint | On the upgraded key |
+|---|---|
+| `GET /v1/cryptocurrency/trending/gainers-losers` | ✅ now available (home "coins worth a check" uses it, with the listings fallback kept) |
+| `GET /v1/cryptocurrency/trending/most-visited` | ✅ now available |
+| `GET /v2/cryptocurrency/price-performance-stats/latest` | ✅ now available (not used by a feature: quotes already carry 1 h → 90 d changes) |
+| `GET /v2/cryptocurrency/market-pairs/latest` | ⛔ still `1006` on this plan |
+
+Demo snapshots of the newly available responses (Bitcoin, Pepe, OFFICIAL TRUMP; public market data only, no key) are saved in [`data/demo/2026-11-20/`](../data/demo/2026-11-20/) for the judging period, in case the key returns to Basic.
+
+**Two docs-vs-reality mismatches:** `market-pairs/latest` and `price-performance-stats/latest` are documented as "Basic and up", but a live Basic key gets `1006`. Covex learns this at runtime (`lib/cmc/capabilities.ts`), so the same code works on Basic and Startup without changes.
 
 ---
 
 ## Example responses (trimmed, from real calls)
 
 ### `GET /v3/cryptocurrency/quotes/latest?id=1&convert=USD`
-Note: `quote` is an **array** of `{symbol, …}`, not the `{ "USD": {…} }` object shown in the docs. Bagcheck normalises both shapes (`normalizeQuoteField`).
+Note: `quote` is an **array** of `{symbol, …}`, not the `{ "USD": {…} }` object shown in the docs. Covex normalises both shapes (`normalizeQuoteField`).
 ```json
 {
   "data": [{
@@ -83,7 +96,7 @@ Note: `platform.id` is a **string** (`"1027"`).
 ```
 
 ### `GET /v1/dex/token/pools?platform=ethereum&address=0x6982…1933&size=20` (Pepe)
-Numbers come back as **strings**; Bagcheck converts them.
+Numbers come back as **strings**; Covex converts them.
 ```json
 {
   "data": [{

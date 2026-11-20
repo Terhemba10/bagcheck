@@ -20,14 +20,6 @@ interface Result {
 /** Pepe's Ethereum contract, so "paste a contract" shows a real lookup. */
 const EXAMPLE_CONTRACT = "0x6982508145454ce325ddbe47a25d4ec3d2311933";
 
-/** Tell Bag someone is typing (throttled). The agent listens and reacts. */
-let lastTypingPing = 0;
-function pingTyping() {
-  const now = Date.now();
-  if (now - lastTypingPing < 350) return;
-  lastTypingPing = now;
-  window.dispatchEvent(new Event("bagcheck:typing"));
-}
 
 export function SearchBar({
   size = "lg",
@@ -49,7 +41,6 @@ export function SearchBar({
   const setQuery = (v: string) => {
     setQ(v);
     setOpen(true);
-    pingTyping();
   };
   const [results, setResults] = useState<Result[]>([]);
   // the term the current results answer; until it matches the input, we're still searching
@@ -114,15 +105,15 @@ export function SearchBar({
 
   return (
     <div className="relative w-full">
-      <label htmlFor={`${listId}-input`} className={cn("mb-2 block font-medium", lg ? "text-base" : "sr-only")}>
+      <label htmlFor={`${listId}-input`} className="sr-only">
         Check any coin
       </label>
       {/* z-40 anchor: the results list must sit above the chips and every later section */}
       <div data-search-anchor className="relative z-40 scroll-mt-20">
       <div
         className={cn(
-          "glass flex items-center gap-3 rounded-xl transition-shadow duration-200 focus-within:shadow-[0_0_0_2px_var(--color-teal),0_12px_40px_-12px_rgb(62_230_200/.5)]",
-          lg ? "px-5 py-4" : "px-4 py-2.5",
+          "flex items-center gap-3 rounded-2xl border border-line-strong bg-surface-2 shadow-[0_1px_0_rgb(255_255_255/.05)_inset,0_24px_60px_-24px_rgb(0_0_0/1)] transition-[box-shadow,border-color] duration-200 focus-within:border-teal/60 focus-within:shadow-[0_0_0_4px_rgb(62_230_200/.12),0_24px_60px_-24px_rgb(62_230_200/.35)]",
+          lg ? "min-h-16 px-5" : "min-h-12 px-4",
         )}
       >
         <IconSearch className={cn("shrink-0 text-muted", lg ? "size-6" : "size-5")} />
@@ -149,17 +140,22 @@ export function SearchBar({
             }
           }}
           onBlur={() => setTimeout(() => setOpen(false), 120)}
-          placeholder="Coin name or address"
+          placeholder={lg ? "Check any coin: name, symbol or contract address" : "Coin name or address"}
           className={cn("w-full bg-transparent outline-none placeholder:text-faint", lg ? "text-lg" : "text-base")}
         />
         {status === "loading" && <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-muted border-t-transparent" aria-hidden="true" />}
+        {lg && status !== "loading" && (
+          <kbd className="hidden shrink-0 rounded-md border border-line px-2 py-1 text-xs text-faint sm:inline" title="Press Ctrl+K anywhere">
+            Ctrl K
+          </kbd>
+        )}
       </div>
       {showList && (
         <ul
           id={`${listId}-list`}
           role="listbox"
           aria-label="Matching coins"
-          className="absolute top-full z-50 mt-2 max-h-80 w-full overflow-auto rounded-lg border border-line bg-bg-raised p-1 shadow-[0_24px_48px_-12px_rgb(0_0_0/.8)]"
+          className="absolute top-full z-50 mt-2 max-h-80 w-full overflow-auto rounded-xl border border-line-strong bg-surface-2 p-1 shadow-[var(--shadow-pop)]"
         >
           {status === "busy" && <li className="px-3 py-2 text-sm text-warn">CoinMarketCap is busy. Try again in a minute.</li>}
           {status === "error" && <li className="px-3 py-2 text-sm text-warn">Search isn&apos;t working right now.</li>}
@@ -189,22 +185,21 @@ export function SearchBar({
 
       {examples && (
         // hidden (not removed) while results are open, so the page below does not jump
-        <p aria-hidden={showList || undefined} className={cn("mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted", showList && "invisible")}>
-          <span>Try:</span>
+        <p aria-hidden={showList || undefined} className={cn("mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-muted", showList && "invisible")}>
+          <span className="text-faint">Try</span>
           {[
             { label: "PEPE", value: "pepe" },
             { label: "SUI", value: "sui" },
             { label: "paste a contract", value: EXAMPLE_CONTRACT },
           ].map((ex, i) => (
             <span key={ex.label} className="inline-flex items-center gap-2">
-              {i > 0 && <span aria-hidden="true" className="text-faint">·</span>}
               <button
                 type="button"
                 onClick={() => {
                   setQuery(ex.value);
                   inputRef.current?.focus();
                 }}
-                className="min-h-9 rounded-full px-2.5 text-teal underline-offset-2 hover:bg-teal-soft hover:underline"
+                className="min-h-9 rounded-full border border-line bg-surface-1 px-3.5 text-text transition-colors hover:border-teal/50 hover:bg-teal-soft"
                 aria-label={ex.value === EXAMPLE_CONTRACT ? "Try a contract address (Pepe on Ethereum)" : `Try ${ex.label}`}
               >
                 {ex.label}

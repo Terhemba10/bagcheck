@@ -1,28 +1,28 @@
-# Bagcheck
+# Covex
 
-[![CI](https://github.com/Terhemba10/bagcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/Terhemba10/bagcheck/actions/workflows/ci.yml)
+[![CI](https://github.com/Terhemba10/covex/actions/workflows/ci.yml/badge.svg)](https://github.com/Terhemba10/covex/actions/workflows/ci.yml)
 
 **Did the founders keep their promises, and can you still get out?**
 
-Bagcheck is an AI agent for crypto holders, built on the [CoinMarketCap API](https://coinmarketcap.com/api/) for the *Build with CMC: API Hackathon* (AI Agents and Automation track).
+Covex is an AI agent for crypto holders, built on the [CoinMarketCap API](https://coinmarketcap.com/api/) for the *Build with CMC: API Hackathon* (AI Agents and Automation track).
 
-> Not financial advice. Bagcheck explains data. It never tells you to buy or sell.
+> Not financial advice. Covex explains data. It never tells you to buy or sell.
 
 ## Try it in 30 seconds
 
-**Live: https://bagcheck-azure.vercel.app** (no sign-up, no wallet)
+**Live: https://covex-ai.vercel.app** (no sign-up, no wallet)
 
-Open a report, watch Bag scan the coin, and read the warning signs one by one:
+Open a report, watch Covex scan the coin, and read the warning signs one by one:
 
 | Coin | What you'll see |
 |---|---|
-| [Bitcoin](https://bagcheck-azure.vercel.app/coin/1) | A large, liquid coin: the baseline |
-| [Pepe](https://bagcheck-azure.vercel.app/coin/24478) | A meme coin: deep DEX liquidity, but the contract scan flags blacklist restrictions |
-| [OFFICIAL TRUMP](https://bagcheck-azure.vercel.app/coin/35336) | Medium concern: most of the supply is still to be released, and unusual volume |
+| [Bitcoin](https://covex-ai.vercel.app/coin/1) | A large, liquid coin: the baseline |
+| [Pepe](https://covex-ai.vercel.app/coin/24478) | A meme coin: deep DEX liquidity, but the contract scan flags blacklist restrictions |
+| [OFFICIAL TRUMP](https://covex-ai.vercel.app/coin/35336) | Medium concern: most of the supply is still to be released, and unusual volume |
 
-Then try the [rescue plan for Pepe](https://bagcheck-azure.vercel.app/rescue/24478), or message [@BagcheckAlertsBot](https://t.me/BagcheckAlertsBot) on Telegram with `/check pepe`.
+Then try the [rescue plan for Pepe](https://covex-ai.vercel.app/rescue/24478), or message the Covex bot, [@BagcheckAlertsBot](https://t.me/BagcheckAlertsBot), on Telegram with `/check pepe` (Telegram usernames can't change, so it keeps the old handle).
 
-![Bag scanning Pepe: search, live scan steps, then the verdict](docs/media/bag-scan.gif)
+![Covex checking Pepe: search, the live agent activity steps, then the verdict and the report cards assembling](docs/media/covex-scan.gif)
 
 ## What it does
 
@@ -34,18 +34,18 @@ Then try the [rescue plan for Pepe](https://bagcheck-azure.vercel.app/rescue/244
 |---|---|
 | ![Report for Pepe](docs/media/report.png) | ![Rescue plan for Pepe](docs/media/rescue.png) |
 
-**Code decides, AI explains.** Scores, thresholds and alerts are computed in TypeScript from CMC data. The LLM (Gemini) only extracts promises (code keeps a quote only if it appears word for word on the cited page) and explains answers in the Ask Bag chat (code rejects any advice or any number that isn't in the report).
+**Code decides, AI explains.** Scores, thresholds and alerts are computed in TypeScript from CMC data. The LLM (Gemini) only extracts promises (code keeps a quote only if it appears word for word on the cited page) and explains answers in the Ask Covex chat (code rejects any advice or any number that isn't in the report).
 
 ## Architecture
 
 ```mermaid
 flowchart LR
   subgraph Clients
-    W[Website<br/>Next.js + 3D Bag]
+    W[Website<br/>Next.js, agent activity UI]
     T[Telegram bot<br/>@BagcheckAlertsBot]
-    M[MCP server<br/>bagcheck-mcp]
+    M[MCP server<br/>covex-mcp]
   end
-  subgraph Server["Bagcheck server (Vercel)"]
+  subgraph Server["Covex server (Vercel)"]
     API[API routes<br/>rate limits, secret blocker]
     CORE[Core: 7 signals, score,<br/>rescue, alert rules]
     PROM[Promise check<br/>safe fetch + quote verification]
@@ -83,7 +83,9 @@ All CMC calls go through one server-side client ([`lib/cmc/client.ts`](lib/cmc/c
 | `GET /v2/cryptocurrency/price-performance-stats/latest` | Probed only; not used on Basic | ❌ 1006 |
 | `GET /v1/global-metrics/quotes/latest`, `GET /v5/cryptocurrency/ohlcv/historical`, `GET /v1/dex/token-liquidity/query` | Probed by `/api/admin/probe` and documented in [`docs/ENDPOINTS.md`](docs/ENDPOINTS.md); the product compares with Bitcoin's quote and uses its own liquidity snapshots instead | ✅ / ✅ / 400 |
 
-Live status per endpoint, example responses and plan notes: [`docs/ENDPOINTS.md`](docs/ENDPOINTS.md). Real call log: [`docs/API_EVIDENCE.md`](docs/API_EVIDENCE.md) and the live [`/evidence`](https://bagcheck-azure.vercel.app/evidence) page. What we ran into: [`docs/API_FEEDBACK.md`](docs/API_FEEDBACK.md).
+**Plan change (20 Nov 2026):** the key moved from Basic to a paid plan (450,000 credits/month). Trending and price-performance now answer live; market pairs still returns `1006`. Demo snapshots of the newly available data are in [`data/demo/`](data/demo/). Everything above still works on Basic.
+
+Live status per endpoint, example responses and plan notes: [`docs/ENDPOINTS.md`](docs/ENDPOINTS.md). Real call log: [`docs/API_EVIDENCE.md`](docs/API_EVIDENCE.md) and the live [`/evidence`](https://covex-ai.vercel.app/evidence) page. What we ran into: [`docs/API_FEEDBACK.md`](docs/API_FEEDBACK.md).
 
 ### How it protects the key and the credits
 
@@ -94,12 +96,12 @@ Live status per endpoint, example responses and plan notes: [`docs/ENDPOINTS.md`
 
 ## Use it from an AI assistant (MCP)
 
-[`mcp/`](mcp/) is a Model Context Protocol server with four tools: `check_token`, `promise_check`, `watch_token` and `rescue_plan`. It needs no API key (it calls Bagcheck's public API with the same limits and rules) and runs with one command, with no clone or build. It needs Node.js 20 or newer.
+[`mcp/`](mcp/) is a Model Context Protocol server with four tools: `check_token`, `promise_check`, `watch_token` and `rescue_plan`. It needs no API key (it calls Covex's public API with the same limits and rules) and runs with one command, with no clone or build. It needs Node.js 20 or newer.
 
 Claude Code:
 
 ```bash
-claude mcp add bagcheck -- npx -y https://raw.githubusercontent.com/Terhemba10/bagcheck/main/mcp/bagcheck-mcp.tgz
+claude mcp add covex -- npx -y https://raw.githubusercontent.com/Terhemba10/covex/main/mcp/covex-mcp.tgz
 ```
 
 Claude Desktop and other clients (MCP config file):
@@ -107,15 +109,15 @@ Claude Desktop and other clients (MCP config file):
 ```json
 {
   "mcpServers": {
-    "bagcheck": {
+    "covex": {
       "command": "npx",
-      "args": ["-y", "https://raw.githubusercontent.com/Terhemba10/bagcheck/main/mcp/bagcheck-mcp.tgz"]
+      "args": ["-y", "https://raw.githubusercontent.com/Terhemba10/covex/main/mcp/covex-mcp.tgz"]
     }
   }
 }
 ```
 
-On Windows, Claude Desktop needs `"command": "cmd"` and `"args": ["/c", "npx", "-y", "https://raw.githubusercontent.com/Terhemba10/bagcheck/main/mcp/bagcheck-mcp.tgz"]`. Then ask: *"Check PEPE with Bagcheck"* or *"I can't sell my token, what can I do?"* More in [`mcp/README.md`](mcp/README.md).
+On Windows, Claude Desktop needs `"command": "cmd"` and `"args": ["/c", "npx", "-y", "https://raw.githubusercontent.com/Terhemba10/covex/main/mcp/covex-mcp.tgz"]`. Then ask: *"Check PEPE with Covex"* or *"I can't sell my token, what can I do?"* More in [`mcp/README.md`](mcp/README.md).
 
 ## Run it locally
 
@@ -138,7 +140,7 @@ CI runs all four on every push, and checks that the committed MCP bundle matches
 
 ## Tech
 
-Next.js 16 (App Router) + TypeScript + Tailwind v4, React Three Fiber for Bag the agent (glass orb with High/Low quality and a 2D fallback), Upstash Redis, Google Gemini, the MCP TypeScript SDK, Vitest and Playwright. Design system: [`design/DESIGN_SPEC.md`](design/DESIGN_SPEC.md), live at [`/design`](https://bagcheck-azure.vercel.app/design).
+Next.js 16 (App Router) + TypeScript + Tailwind v4, Motion for UI animation (one tokens file, reduced-motion and "Simple graphics" aware; no WebGL), Upstash Redis, Google Gemini, the MCP TypeScript SDK, Vitest and Playwright. Design system: [`design/DESIGN_SPEC.md`](design/DESIGN_SPEC.md), live at [`/design`](https://covex-ai.vercel.app/design).
 
 ## Licence
 

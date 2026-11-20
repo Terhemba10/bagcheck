@@ -70,7 +70,7 @@ export function WatchlistView() {
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Your watchlist</h1>
         <p className="text-muted">
           {MODE_TEXT[m.mode] ?? m.mode}
-          {m.intervalHours ? `: Bag re-checks your coins about every ${m.intervalHours} hours` : ""}.{" "}
+          {m.intervalHours ? `: Covex re-checks your coins about every ${m.intervalHours} hours` : ""}.{" "}
           {m.lastRunAt ? `Last check ${when(m.lastRunAt)}.` : "The first check runs soon."}
         </p>
       </header>
@@ -81,7 +81,7 @@ export function WatchlistView() {
       </GlassCard>
 
       {d.coins.length === 0 ? (
-        <StateView kind="empty" title="Nothing watched yet" message="Check a coin and press “Watch this coin”. Bag will re-check it and warn you when something changes." action={<Link href="/#search" className="text-teal hover:underline">Check a coin →</Link>} />
+        <StateView kind="empty" title="Nothing watched yet" message="Check a coin and press “Watch this coin”. Covex will re-check it and warn you when something changes." action={<Link href="/#search" className="text-teal hover:underline">Check a coin →</Link>} />
       ) : (
         <section aria-labelledby="coins-title" className="space-y-3">
           <h2 id="coins-title" className="text-xl font-semibold">

@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/motion/CountUp";
 import { GlassCard } from "./GlassCard";
 import { SourceTag, type SourceKind } from "./SourceTag";
 import { StatusPill } from "./StatusPill";
@@ -26,7 +27,7 @@ export function SignalCard({ title, level, value, valueLabel, meaning, why, sour
       </header>
       {value && (
         <p>
-          <span className="tabular text-3xl font-semibold tracking-tight">{value}</span>
+          <CountUp value={value} className="tabular text-3xl font-semibold tracking-tight" />
           {valueLabel && <span className="ml-2 text-sm text-muted">{valueLabel}</span>}
         </p>
       )}

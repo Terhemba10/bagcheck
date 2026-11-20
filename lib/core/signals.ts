@@ -1,5 +1,5 @@
 /**
- * The seven Bagcheck signals. Pure functions from CMC data to a level and
+ * The seven Covex signals. Pure functions from CMC data to a level and
  * plain-English copy. Code decides; the AI only explains later.
  *
  * Every input is wrapped in `Avail<T>` so a signal can say *why* it has no

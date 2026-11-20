@@ -3,7 +3,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
-const spec = process.argv[2] ?? "https://raw.githubusercontent.com/Terhemba10/bagcheck/main/mcp/bagcheck-mcp.tgz";
+const spec = process.argv[2] ?? "https://raw.githubusercontent.com/Terhemba10/covex/main/mcp/covex-mcp.tgz";
 const win = process.platform === "win32";
 const transport = new StdioClientTransport({
   command: win ? "cmd" : "npx",

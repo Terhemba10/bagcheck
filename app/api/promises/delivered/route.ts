@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 const Body = z.object({ coinId: z.number().int().positive(), quoteKey: z.string().regex(/^[a-f0-9]{16}$/), delivered: z.boolean() });
 
-/** "Mark as delivered": your own note, so Bagcheck stops reminding you about that promise. */
+/** "Mark as delivered": your own note, so Covex stops reminding you about that promise. */
 export async function POST(req: Request) {
   const limited = await rateLimit(req, LIMITS.search);
   if (limited) return limited;
