@@ -88,7 +88,11 @@ export async function getWatchlist(uid: string): Promise<WatchCoin[]> {
 export async function addWatch(uid: string, coin: Omit<WatchCoin, "addedAt">): Promise<{ ok: true } | { ok: false; reason: "limit" }> {
   const meta = (await kv().get<Record<string, WatchCoin>>(k.wlMeta(uid))) ?? {};
   if (!meta[coin.id] && Object.keys(meta).length >= MAX_WATCH) return { ok: false, reason: "limit" };
-  meta[coin.id] ??= { ...coin, addedAt: new Date().toISOString() };
+  if (!meta[coin.id]) {
+    // strictly after the newest entry, so two coins added in the same millisecond keep their order
+    const newest = Math.max(0, ...Object.values(meta).map((c) => Date.parse(c.addedAt) || 0));
+    meta[coin.id] = { ...coin, addedAt: new Date(Math.max(Date.now(), newest + 1)).toISOString() };
+  }
   await kv().set(k.wlMeta(uid), meta);
   await kv().sadd(k.watchers(coin.id), uid);
   await kv().sadd(k.watched, String(coin.id));
