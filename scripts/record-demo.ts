@@ -1,8 +1,11 @@
 /**
  * README media from the live site in real Chrome (GPU, so Bag renders in 3D):
  *  - docs/media/bag-scan.webm: home → search "pepe" → Bag scans → verdict
- *  - docs/media/*.png: report, rescue plan and connect screenshots
- * Then convert the clip to a GIF with ffmpeg (see docs/media/README.md).
+ *  - docs/media/*.png: report and rescue plan screenshots
+ * Then make the GIF (cuts the wait while the report renders; adjust the times to the clip):
+ *   F="select='between(t,1.5,10.6)+between(t,15.2,27.5)',setpts=N/FRAME_RATE/TB,fps=8,scale=680:-1:flags=lanczos"
+ *   ffmpeg -i bag-scan.webm -vf "$F,palettegen=max_colors=128:stats_mode=diff" pal.png
+ *   ffmpeg -i bag-scan.webm -i pal.png -lavfi "$F [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=4" bag-scan.gif
  *
  *   npx tsx scripts/record-demo.ts            # BASE_URL defaults to the live site
  * Reports are cached, so a run usually costs 0–4 CMC credits.
@@ -46,7 +49,6 @@ async function main() {
   const shots: [string, string, number][] = [
     ["report", "/coin/24478", 7000],
     ["rescue", "/rescue/24478", 4000],
-    ["connect", "/connect", 2500],
   ];
   const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   await ctx2.addInitScript({ content: "window.__name = (f) => f;" });

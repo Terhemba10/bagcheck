@@ -34,8 +34,11 @@
 
 - **Phase f (MCP server):** `mcp/` package `bagcheck-mcp` (stdio, `@modelcontextprotocol/sdk`, bundled with esbuild to `mcp/dist/index.js`, not committed). Tools: `check_token`, `promise_check`, `watch_token` (watch/unwatch/list + Telegram link), `rescue_plan` (with optional `amount_usd` impact estimate). It calls the public Bagcheck API (no keys; same limits and credit guard), keeps an anonymous watchlist id in `~/.bagcheck/mcp.json`, refuses seed phrases/keys, and ends every answer with the disclaimer. `npm run smoke` calls every tool against the live site (6/6 passed 20 Nov). Setup on `/connect` and in the README.
 
+- **Phase g (tests, CI, docs):** `.github/workflows/ci.yml` (typecheck, lint, unit tests, build; MCP job builds the server, checks the committed `mcp/bagcheck-mcp.tgz` matches the source, offline smoke), badge in the README. MCP runs with one command: `npx -y https://raw.githubusercontent.com/Terhemba10/bagcheck/main/mcp/bagcheck-mcp.tgz` (self-contained bundle, no runtime deps; rebuild with `npm run pack` in `mcp/`). README rewritten (try-it, 3 example coins, scan GIF + screenshots from `scripts/record-demo.ts`, architecture diagram, endpoint table, MCP setup). `docs/API_FEEDBACK.md` ready for the submission note. Fixed: search said "No coins match" while loading; same-millisecond watchlist adds reordered.
+- **Note:** polling the live site with curl (~80 requests in 10 min) got this machine's IP a temporary Vercel "Security Checkpoint" 403 (automatic DDoS mitigation; attack mode and bot protection are off, other users unaffected). Check deploys with `npx vercel ls` and CI with `gh`.
+
 ## Next (in order)
-1. Phases g–h per `docs/PLAN.md`: tests/CI/docs, video + submission. Before 9 Dec: demo snapshots (PLAN §1b).
+1. Phase h per `docs/PLAN.md`: tests/CI/docs, video + submission. Before 9 Dec: demo snapshots (PLAN §1b).
 
 ## Known polish items
 - Amber (concern) state: the bloomed core lowers the face's contrast on High quality.
