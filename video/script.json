@@ -1,0 +1,65 @@
+{
+  "voice": "en-US-AndrewNeural",
+  "rate": "+4%",
+  "scenes": [
+    {
+      "id": "thumb",
+      "kind": "card",
+      "card": "../out/thumb-1080.png",
+      "hold": 2.2
+    },
+    {
+      "id": "title",
+      "kind": "card",
+      "card": "title.png",
+      "vo": "Covex. Did the founders keep their promises, and can you still get out?"
+    },
+    {
+      "id": "problem",
+      "kind": "card",
+      "card": "problem.png",
+      "vo": "Crypto founders promise roadmaps and launches. Many dates slip, and buyers usually find out too late. Most tools show you the price, not the promises."
+    },
+    {
+      "id": "search",
+      "kind": "live",
+      "vo": "Covex is an AI agent built on the CoinMarketCap API. Let's check a coin: Arbitrum. As it works, watch the agent activity panel. Every step is a real API call, and you can see which CoinMarketCap endpoint it used: quotes, the DEX security scan, liquidity pools, the project's own links. Scores are computed in code. The AI only explains. It never invents a number."
+    },
+    {
+      "id": "report",
+      "kind": "live",
+      "vo": "The verdict: low concern, with one thing worth watching. Dilution: only about seventy percent of all tokens exist today, so more can still be released. Liquidity: millions of dollars in pools paired with major assets. And the contract scan found no risky switches and no hidden tax. Every card explains why it matters."
+    },
+    {
+      "id": "promises",
+      "kind": "live",
+      "vo": "Now the promise check, on Ethereum. Covex reads the project's own roadmap pages and lists each dated promise, with its status. This one is targeted for 2026. Click the source, and there's the exact sentence on ethereum.org, word for word. Covex shows what was promised and when. You judge."
+    },
+    {
+      "id": "watch",
+      "kind": "live",
+      "vo": "Back on Arbitrum, one click to watch it. No account needed. Covex re-checks watched coins on a schedule, and if a warning sign appears, like liquidity draining or a promise date passing, it shows up in Alerts and on Telegram."
+    },
+    {
+      "id": "board",
+      "kind": "live",
+      "vo": "The Risk board ranks the top coins by concern, with seven-day charts and each coin's top warning sign. Filter to memes, and any row opens straight into its full report."
+    },
+    {
+      "id": "rescue",
+      "kind": "live",
+      "vo": "If it went wrong, open the rescue plan. Recovery scammers are called out up front. Then: where the coin can still be traded, an estimated price impact for your amount, and steps to protect what's left, with official links only. Covex never takes a seed phrase. Paste one, and it's blocked before it goes anywhere. Information, never financial advice."
+    },
+    {
+      "id": "connect",
+      "kind": "live",
+      "vo": "Covex also works inside AI assistants: one command adds its MCP server. And the API evidence page shows every real CoinMarketCap call, with the credits it used."
+    },
+    {
+      "id": "end",
+      "kind": "card",
+      "card": "end.png",
+      "vo": "Covex. Built with the CoinMarketCap API, for the AI Agents and Automation track. Try it live."
+    }
+  ]
+}

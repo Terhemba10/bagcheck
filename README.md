@@ -22,7 +22,9 @@ Open a report, watch Covex scan the coin, and read the warning signs one by one:
 
 Then try the [rescue plan for Pepe](https://covex-ai.vercel.app/rescue/24478), or message the Covex bot, [@BagcheckAlertsBot](https://t.me/BagcheckAlertsBot), on Telegram with `/check pepe` (Telegram usernames can't change, so it keeps the old handle).
 
-![Covex checking Pepe: search, the live agent activity steps, then the verdict and the report cards assembling](docs/media/covex-scan.gif)
+![Covex checking Arbitrum: search, the live agent activity steps with their CoinMarketCap endpoints, then the verdict](docs/media/covex-highlight.gif)
+
+**Demo video (2:37):** [`video/covex-demo.mp4`](video/covex-demo.mp4). Submission notes: [`SUBMISSION.md`](SUBMISSION.md).
 
 ## What it does
 
