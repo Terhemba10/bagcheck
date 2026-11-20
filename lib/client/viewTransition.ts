@@ -35,8 +35,10 @@ export function navigateWithTransition(push: (href: string) => void, href: strin
         const timer = setTimeout(resolve, 1200); // never hang if the route is slow
         resolveNav = () => {
           clearTimeout(timer);
-          // one frame so the new page's hero is painted
-          requestAnimationFrame(() => resolve());
+          // resolve right away: the new route has committed. (Don't wait for an animation
+          // frame: Chrome doesn't run rAF during a transition's update, so it would hang
+          // until Chrome's own 4 s timeout aborts the transition.)
+          resolve();
         };
         push(href);
       }),
