@@ -1,8 +1,8 @@
-# Status (updated 19 Nov 2026)
+# Status (updated 20 Nov 2026)
 
 **Live:** https://bagcheck-azure.vercel.app (Vercel project `sanix2/bagcheck`; every push to `main` auto-deploys to production)
 **Repo:** https://github.com/Terhemba10/bagcheck (public)
-**CMC key:** Basic plan (15,000 credits/month). The hackathon Startup upgrade had not arrived as of 19 Nov.
+**CMC key:** Basic plan (15,000 credits/month). The hackathon Startup upgrade had not arrived as of 20 Nov (14,834 credits left at the start of phase f).
 **Storage:** Upstash Redis via Vercel (`KV_REST_API_URL` / `KV_REST_API_TOKEN`). Locally, without those, an in-memory store is used.
 **LLM:** Google Gemini via `lib/llm` (REST, key in a header). Default `gemini-3.5-flash-lite` with minimal thinking, falling back to `gemini-flash-lite-latest` (override: `GEMINI_MODEL`). Tested 19 Nov: full Flash models timed out (>40 s) and `gemini-2.5-flash` is closed to new keys.
 
@@ -30,8 +30,12 @@
 
 - **Phase e (rescue plan):** `/rescue` (any coin via search + general steps) and `/rescue/[id]` (`/api/rescue/[id]`, `lib/rescue/*`): recovery-scam shield at the top; "Can I still sell?" (DEX pools by our token's side, CEX markets when the plan allows, price-impact ESTIMATE from a 50/50 pool model, thin-liquidity fact); protect-your-wallet steps with the fake-revoke warning above them; official links from a hard-coded allowlist (`lib/rescue/links.ts`, verified 19–20 Nov); evidence summary built and downloaded in the browser with the secret blocker on every field; where to report (exchange, IC3, local police cybercrime unit); lessons from snapshots/alerts only. Bot `/rescue [coin]` links to the same page. Guard test scans the rescue copy for advice wording and non-allowlisted links.
 
+- **Liquidity counts major-asset pools only** (`lib/core/pools.ts`, one list): report signal, rescue estimate and the watchlist liquidity rule (snapshots tagged `liqMethod: "major"`; older snapshots are ignored so the change can't fire a false alert). Other pools are shown collapsed as "not counted".
+
+- **Phase f (MCP server):** `mcp/` package `bagcheck-mcp` (stdio, `@modelcontextprotocol/sdk`, bundled with esbuild to `mcp/dist/index.js`, not committed). Tools: `check_token`, `promise_check`, `watch_token` (watch/unwatch/list + Telegram link), `rescue_plan` (with optional `amount_usd` impact estimate). It calls the public Bagcheck API (no keys; same limits and credit guard), keeps an anonymous watchlist id in `~/.bagcheck/mcp.json`, refuses seed phrases/keys, and ends every answer with the disclaimer. `npm run smoke` calls every tool against the live site (6/6 passed 20 Nov). Setup on `/connect` and in the README.
+
 ## Next (in order)
-1. Phases f–h per `docs/PLAN.md`: MCP server, tests/CI/docs, video + submission. Before 9 Dec: demo snapshots (PLAN §1b).
+1. Phases g–h per `docs/PLAN.md`: tests/CI/docs, video + submission. Before 9 Dec: demo snapshots (PLAN §1b).
 
 ## Known polish items
 - Amber (concern) state: the bloomed core lowers the face's contrast on High quality.

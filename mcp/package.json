@@ -1,0 +1,31 @@
+{
+  "name": "bagcheck-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Bagcheck: plain-English crypto risk reports, promise checks, watchlist alerts and rescue plans, built on live CoinMarketCap data.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "bagcheck-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist/index.js --banner:js=\"#!/usr/bin/env node\"",
+    "start": "node dist/index.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

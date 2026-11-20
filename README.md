@@ -10,7 +10,7 @@ Bagcheck is an AI agent for crypto holders, built on the [CoinMarketCap API](htt
 
 > Not financial advice. Bagcheck explains data. It never tells you to buy or sell.
 
-**Status:** work in progress. Live: search, the API evidence page and the design system. The report, watchlist, rescue plan, Telegram bot and MCP server are being built. See [`docs/PLAN.md`](docs/PLAN.md).
+**Live:** https://bagcheck-azure.vercel.app. Working today: the risk report, the Promise check, Ask Bag chat, the watchlist with Telegram alerts, the rescue plan and the MCP server. See [`docs/STATUS.md`](docs/STATUS.md).
 
 ## CoinMarketCap endpoints used
 
@@ -35,6 +35,20 @@ Live status per endpoint, example responses and plan notes: [`docs/ENDPOINTS.md`
 - **Plan detection:** a `1006` response marks that endpoint as not in the plan, and the UI labels it instead of breaking.
 - **Credit guard:** paid calls stop at a daily cap and a monthly reserve, read live from `/v1/key/info` ([`lib/cmc/guard.ts`](lib/cmc/guard.ts)).
 - **Per-IP rate limits** on public API routes, with IPs stored only as hashes ([`lib/ratelimit.ts`](lib/ratelimit.ts)).
+
+## Use it from an AI assistant (MCP)
+
+[`mcp/`](mcp/) is a Model Context Protocol server with four tools: `check_token`, `promise_check`, `watch_token` and `rescue_plan`. It needs no API key: it calls Bagcheck's public API, with the same rate limits, credit guard and rules (no buy or sell advice; seed phrases and private keys are refused).
+
+```bash
+cd mcp
+npm install
+npm run build
+npm run smoke            # optional: calls each tool against the live site
+claude mcp add bagcheck -- node /path/to/bagcheck/mcp/dist/index.js
+```
+
+For Claude Desktop or other clients, add `{"mcpServers": {"bagcheck": {"command": "node", "args": ["/path/to/bagcheck/mcp/dist/index.js"]}}}` to the MCP config. Set `BAGCHECK_URL` to point it at a local server. The watchlist id is kept in `~/.bagcheck/mcp.json`.
 
 ## Run it locally
 
