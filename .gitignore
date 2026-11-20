@@ -29,3 +29,7 @@ next-env.d.ts
 
 # private brief (kept local)
 PROMPT.md
+
+# raw screen recordings (the GIF is committed)
+docs/media/*.webm
+docs/media/.video/

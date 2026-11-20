@@ -52,6 +52,8 @@ export function SearchBar({
     pingTyping();
   };
   const [results, setResults] = useState<Result[]>([]);
+  // the term the current results answer; until it matches the input, we're still searching
+  const [resultsFor, setResultsFor] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "busy">("idle");
@@ -72,6 +74,7 @@ export function SearchBar({
         if (!res.ok) return setStatus("error");
         const json = (await res.json()) as { results: Result[] };
         setResults(json.results);
+        setResultsFor(term);
         setActive(json.results.length ? 0 : -1);
         setOpen(true);
         setStatus("idle");
@@ -160,7 +163,9 @@ export function SearchBar({
         >
           {status === "busy" && <li className="px-3 py-2 text-sm text-warn">CoinMarketCap is busy. Try again in a minute.</li>}
           {status === "error" && <li className="px-3 py-2 text-sm text-warn">Search isn&apos;t working right now.</li>}
-          {status === "idle" && results.length === 0 && <li className="px-3 py-2 text-sm text-muted">No coins match “{q.trim()}”.</li>}
+          {status !== "busy" && status !== "error" && results.length === 0 && (
+            <li className="px-3 py-2 text-sm text-muted">{resultsFor === q.trim() ? <>No coins match “{q.trim()}”.</> : "Searching…"}</li>
+          )}
           {results.map((r, i) => (
             <li
               key={r.id}

@@ -1,5 +1,6 @@
 // Smoke test: start the built MCP server over stdio, list its tools and call
-// each one against the live Bagcheck API. Costs a few CMC credits (cached
+// each one against the live Bagcheck API (--offline: tools list and the
+// secret blocker only). Costs a few CMC credits (cached
 // reports cost 0). Usage: npm run build && npm run smoke
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -40,10 +41,13 @@ async function call(name, args, expect) {
   return out;
 }
 
-await call("check_token", { coin: "pepe" }, /Pepe/i);
-await call("rescue_plan", { coin: "pepe", amount_usd: 5000 }, /estimate/i);
-await call("watch_token", { action: "list" }, /watchlist/i);
-await call("promise_check", { coin: "bitcoin" }, /promise|commitment|roadmap|couldn/i);
+// --offline (used in CI): no calls to the live site, so no CMC credits
+if (!process.argv.includes("--offline")) {
+  await call("check_token", { coin: "pepe" }, /Pepe/i);
+  await call("rescue_plan", { coin: "pepe", amount_usd: 5000 }, /estimate/i);
+  await call("watch_token", { action: "list" }, /watchlist/i);
+  await call("promise_check", { coin: "bitcoin" }, /promise|commitment|roadmap|couldn/i);
+}
 
 // the secret blocker must refuse a seed phrase without calling the API
 const seed = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";

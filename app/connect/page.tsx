@@ -5,6 +5,8 @@ import { BOT_USERNAME } from "@/lib/telegram/api";
 
 export const metadata: Metadata = { title: "Connect" };
 
+const MCP_TGZ = "https://raw.githubusercontent.com/Terhemba10/bagcheck/main/mcp/bagcheck-mcp.tgz";
+
 export default function ConnectPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -43,23 +45,22 @@ export default function ConnectPage() {
           </ul>
         </div>
         <div className="space-y-2 text-sm">
-          <p className="font-medium">1. Build it (Node 20 or newer)</p>
-          <pre className="overflow-x-auto rounded-lg bg-black/30 p-3 font-mono text-xs">{`git clone https://github.com/Terhemba10/bagcheck
-cd bagcheck/mcp
-npm install
-npm run build`}</pre>
-          <p className="font-medium">2. Add it to your assistant</p>
-          <p className="text-muted">Claude Code:</p>
-          <pre className="overflow-x-auto rounded-lg bg-black/30 p-3 font-mono text-xs">{`claude mcp add bagcheck -- node /path/to/bagcheck/mcp/dist/index.js`}</pre>
+          <p className="text-muted">One command, no clone or build (needs Node.js 20 or newer). Claude Code:</p>
+          <pre className="overflow-x-auto rounded-lg bg-black/30 p-3 font-mono text-xs">{`claude mcp add bagcheck -- npx -y ${MCP_TGZ}`}</pre>
           <p className="text-muted">Claude Desktop and other clients (in the MCP config file):</p>
           <pre className="overflow-x-auto rounded-lg bg-black/30 p-3 font-mono text-xs">{`{
   "mcpServers": {
     "bagcheck": {
-      "command": "node",
-      "args": ["/path/to/bagcheck/mcp/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "${MCP_TGZ}"]
     }
   }
 }`}</pre>
+          <p className="text-muted">
+            On Windows, Claude Desktop needs <code className="font-mono">&quot;command&quot;: &quot;cmd&quot;</code> with{" "}
+            <code className="font-mono">&quot;args&quot;: [&quot;/c&quot;, &quot;npx&quot;, &quot;-y&quot;, …]</code>. Source and details:{" "}
+            <a className="text-teal underline" href="https://github.com/Terhemba10/bagcheck/tree/main/mcp">github.com/Terhemba10/bagcheck/tree/main/mcp</a>.
+          </p>
           <p className="text-muted">
             Then ask, for example: &ldquo;Check PEPE with Bagcheck&rdquo; or &ldquo;I can&apos;t sell my token, what can I do?&rdquo;
           </p>

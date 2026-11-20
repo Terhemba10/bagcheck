@@ -1,0 +1,65 @@
+name: CI
+
+# Typecheck, lint, unit tests and the production build on every push and PR.
+# No secrets are needed: unit tests use fixtures, and nothing here calls CoinMarketCap.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App (typecheck, lint, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_CONFIG_NATIVE_IGNORE_WARNING: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npx eslint .
+      - name: Unit tests
+        run: npx vitest run
+      - name: Build
+        run: npm run build
+
+  mcp:
+    name: MCP server (build, bundle up to date, offline smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mcp/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Build
+        run: npm run build
+      - name: Committed bagcheck-mcp.tgz matches the source
+        run: |
+          mkdir -p /tmp/pkg && tar -xzf bagcheck-mcp.tgz -C /tmp/pkg
+          if ! cmp -s /tmp/pkg/package/dist/index.js dist/index.js; then
+            echo "::error::mcp/bagcheck-mcp.tgz is out of date. Run 'npm run pack' in mcp/ and commit it."
+            exit 1
+          fi
+      - name: Offline smoke (lists tools, refuses a seed phrase; no API calls)
+        run: npm run smoke -- --offline
