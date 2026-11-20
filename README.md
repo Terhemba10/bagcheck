@@ -24,7 +24,7 @@ Then try the [rescue plan for Pepe](https://covex-ai.vercel.app/rescue/24478), o
 
 ![Covex checking Arbitrum: search, the live agent activity steps with their CoinMarketCap endpoints, then the verdict](docs/media/covex-highlight.gif)
 
-**Demo video (2:37):** [`video/covex-demo.mp4`](video/covex-demo.mp4). Submission notes: [`SUBMISSION.md`](SUBMISSION.md).
+**Demo video (2:37):** [watch on YouTube](https://youtu.be/HydfNouc0Eg) · [`video/covex-demo.mp4`](video/covex-demo.mp4). Submission notes: [`SUBMISSION.md`](SUBMISSION.md).
 
 ## What it does
 

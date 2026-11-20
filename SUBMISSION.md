@@ -8,7 +8,7 @@
 |---|---|
 | Live app | https://covex-ai.vercel.app (no sign-up, no wallet) |
 | Code | https://github.com/Terhemba10/covex (MIT) |
-| Demo video | *(link added after upload)* · local file `video/covex-demo.mp4`, 2:37 |
+| Demo video | https://youtu.be/HydfNouc0Eg (2:37) · file: `video/covex-demo.mp4` |
 | Telegram bot | [@BagcheckAlertsBot](https://t.me/BagcheckAlertsBot) (display name Covex) |
 | MCP server | `npx -y https://raw.githubusercontent.com/Terhemba10/covex/main/mcp/covex-mcp.tgz` |
 

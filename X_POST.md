@@ -1,6 +1,6 @@
 # X post drafts
 
-Not posted. Attach `video/covex-demo.mp4` (or the 15 s `docs/media/covex-highlight.gif`).
+Not posted. Attach `video/covex-demo.mp4` (or the 15 s `docs/media/covex-highlight.gif`), or link the demo: https://youtu.be/HydfNouc0Eg
 
 ## Single post (under 280 characters)
 
@@ -16,7 +16,8 @@ Not posted. Attach `video/covex-demo.mp4` (or the 15 s `docs/media/covex-highlig
 
 Covex is an AI agent built on the @CoinMarketCap API for the #BuildwithCMC hackathon (AI Agents and Automation track).
 
-Live, no sign-up: covex-ai.vercel.app 🎥
+Live, no sign-up: covex-ai.vercel.app
+🎥 Demo: https://youtu.be/HydfNouc0Eg
 
 2/ Check a coin and you can watch the agent work: every step is a real CMC API call (quotes, DEX security scan, liquidity pools, official links), shown with its endpoint. Scores are computed in code. The AI only explains; it never invents a number.
 
