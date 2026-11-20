@@ -281,3 +281,45 @@ html[data-sidebar="collapsed"] {
 .sb-offset {
   transition: width var(--duration-base) var(--ease-out-soft), padding-left var(--duration-base) var(--ease-out-soft);
 }
+
+/* Shared-element morph target on the report (only the visible copy is named). */
+@media (max-width: 1023.98px) {
+  .vt-hero-mobile { view-transition-name: coin-hero; }
+}
+@media (min-width: 1024px) {
+  .vt-hero-desktop { view-transition-name: coin-hero; }
+}
+::view-transition-group(coin-hero) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+}
+
+/* Risk board rows: a light edge sweeping across on hover (a transformed strip: compositor-only, no repaints) */
+.board-row { position: relative; }
+.board-row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 0%, rgb(62 230 200 / 0.10) 45%, rgb(255 255 255 / 0.07) 50%, transparent 100%);
+  transform: translateX(-110%);
+  opacity: 0;
+}
+.board-row:hover::after,
+.board-row:focus-visible::after {
+  opacity: 1;
+  animation: sweep 900ms var(--ease-out-soft) 1 both;
+}
+@keyframes sweep {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(240%); }
+}
+html[data-graphics="simple"] .board-row::after { display: none; }
+html[data-scrolling] .board-row { pointer-events: none; }

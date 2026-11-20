@@ -6,6 +6,7 @@ import {
   IconLifebuoy,
   IconList,
   IconPlug,
+  IconTable,
   IconSearch,
 } from "@/components/ui/icons";
 
@@ -27,6 +28,7 @@ export interface NavItem {
 export const NAV: NavItem[] = [
   { id: "home", label: "Home", Icon: IconHome, href: "/", keywords: "start" },
   { id: "check", label: "Check a coin", Icon: IconSearch, action: "palette", bottom: true, keywords: "search report risk" },
+  { id: "board", label: "Risk board", Icon: IconTable, href: "/risk", keywords: "table top coins market cap memes sort" },
   { id: "watchlist", label: "Watchlist", Icon: IconList, href: "/watchlist", bottom: true, keywords: "watch hold monitor" },
   { id: "alerts", label: "Alerts", Icon: IconBell, href: "/alerts", keywords: "warnings notifications" },
   { id: "rescue", label: "Rescue", Icon: IconLifebuoy, href: "/rescue", bottom: true, keywords: "help sell drained scam" },
@@ -39,6 +41,7 @@ export const NAV: NavItem[] = [
 export function activeNavId(pathname: string): string | null {
   if (pathname === "/") return "home";
   if (pathname.startsWith("/coin/")) return "check";
+  if (pathname.startsWith("/risk")) return "board";
   if (pathname.startsWith("/alerts")) return "alerts";
   if (pathname.startsWith("/rescue")) return "rescue";
   if (pathname.startsWith("/watchlist")) return "watchlist";

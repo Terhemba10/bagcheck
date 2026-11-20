@@ -14,6 +14,7 @@ const base = process.env.BASE_URL ?? "http://localhost:3000";
 const out = "design/screens";
 const PAGES = [
   ["home", "/"],
+  ["risk", "/risk"],
   ["report", "/coin/24478"],
   ["rescue", "/rescue/24478"],
   ["watchlist", "/watchlist"],
@@ -25,6 +26,7 @@ async function settle(page: Page, path: string) {
   await page.goto(base + path, { waitUntil: "load", timeout: 90_000 });
   // reports stream in; wait for the verdict, then for cards to finish assembling
   if (path.startsWith("/coin/")) await page.getByText("Covex verdict").waitFor();
+  if (path === "/risk") await page.getByRole("row", { name: /Open the report/ }).first().waitFor({ timeout: 60_000 });
   if (path.startsWith("/coin/")) await page.locator("text=/\\d+\\/8 done/").waitFor({ timeout: 60_000 }).catch(() => undefined);
   await page.waitForTimeout(1800);
 }
@@ -49,7 +51,7 @@ async function main() {
     await ctx.addInitScript({ content: `window.__name = (f) => f; try { localStorage.setItem("covex:sidebar", "${collapsed ? "collapsed" : "open"}") } catch {}` });
     const page = await ctx.newPage();
     for (const [name, path] of PAGES) {
-      if (collapsed && !["home", "report"].includes(name)) continue;
+      if (collapsed && !["home", "report", "risk"].includes(name)) continue;
       await settle(page, path);
       await shot(page, `${name}-${label}`);
     }

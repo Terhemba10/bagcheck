@@ -1,3 +1,4 @@
+import { savePromiseSummary } from "@/lib/core/boardSummaries";
 import "server-only";
 import { getInfo } from "@/lib/cmc/api";
 import { llm, LlmError } from "@/lib/llm";
@@ -62,7 +63,11 @@ export async function runPromiseCheck(id: number, opts: { fresh?: boolean; now?:
   const key = promisesKey(id);
   if (!opts.fresh) {
     const cached = await kv().get<PromiseCheck>(key).catch(() => null);
-    if (cached) return refreshStatuses(cached, opts.now);
+    if (cached) {
+      const fresh = refreshStatuses(cached, opts.now);
+      void savePromiseSummary(id, fresh.promises.map((p) => p.status)); // keeps the Risk board current
+      return fresh;
+    }
   }
   const now = opts.now ?? new Date();
   const info = (await getInfo([id])).value[id];
@@ -123,6 +128,7 @@ function safePath(u: string): string {
 
 async function save(key: string, v: PromiseCheck): Promise<PromiseCheck> {
   await kv().set(key, v, TTL).catch(() => undefined);
+  await savePromiseSummary(v.coinId, v.promises.map((p) => p.status)); // for the Risk board
   return v;
 }
 

@@ -105,3 +105,6 @@ export const IconX = (p: IconProps) => (
 export const IconCoin = (p: IconProps) => (
   <Base {...p}><circle cx="12" cy="12" r="8.5" /><path d="M14.5 9.2c-.6-.8-1.5-1.2-2.5-1.2-1.4 0-2.5.8-2.5 2s1.1 1.6 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-1.9-.4-2.5-1.2M12 6.5V8M12 16v1.5" /></Base>
 );
+export const IconTable = (p: IconProps) => (
+  <Base {...p}><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M3.5 9.5h17M3.5 14.5h17M9.5 9.5v10" /></Base>
+);

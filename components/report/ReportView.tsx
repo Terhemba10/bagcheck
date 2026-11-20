@@ -130,7 +130,7 @@ export function ReportView({ id }: { id: number }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)] lg:gap-10">
       {/* phones: the coin comes first */}
-      <div className="lg:hidden">
+      <div className="vt-hero-mobile lg:hidden">
         <CoinHeader r={r} tone={tone} />
       </div>
 
@@ -158,7 +158,7 @@ export function ReportView({ id }: { id: number }) {
       </aside>
 
       <div className="min-w-0 space-y-10">
-        <div className="hidden lg:block">
+        <div className="vt-hero-desktop hidden lg:block">
           <CoinHeader r={r} tone={tone} />
         </div>
 

@@ -3,6 +3,7 @@
 import { MotionConfig } from "motion/react";
 import { useEffect } from "react";
 import { applyGraphics, GRAPHICS_EVENT } from "@/lib/client/graphics";
+import { useViewTransitionResolver } from "@/lib/client/viewTransition";
 import { ChatPanel } from "./ChatPanel";
 import { CommandPalette, useCommandShortcut } from "./CommandPalette";
 import { MobileBottomBar, MobileDrawer, MobileTopBar } from "./MobileChrome";
@@ -15,6 +16,7 @@ import { Sidebar } from "./Sidebar";
  */
 export function AppShell({ children, footer }: { children: React.ReactNode; footer: React.ReactNode }) {
   useCommandShortcut();
+  useViewTransitionResolver();
   useEffect(() => {
     applyGraphics();
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");

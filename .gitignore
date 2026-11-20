@@ -37,3 +37,7 @@ docs/media/.video/
 # Figma MCP skills: installed locally with `npx skills add figma/mcp-server-guide`, not committed
 .claude/skills/figma-*/
 skills-lock.json
+
+# demo video: generated frames/audio and the licensed music track stay local
+video/out/
+video/assets/

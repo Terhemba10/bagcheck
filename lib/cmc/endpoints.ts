@@ -56,8 +56,8 @@ export const ENDPOINTS = {
     path: "/v3/cryptocurrency/listings/latest",
     method: "GET",
     minPlan: "basic",
-    ttl: 3600,
-    purpose: "Home: top movers with warning signs (Basic fallback for trending)",
+    ttl: 900,
+    purpose: "Home: coins worth a check (Basic fallback for trending); the Risk board (top 200, 15 min)",
   },
   marketPairs: {
     path: "/v2/cryptocurrency/market-pairs/latest",

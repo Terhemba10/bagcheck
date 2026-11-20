@@ -5,6 +5,7 @@ import { CmcError } from "@/lib/cmc/errors";
 import type { CoinInfo, CoinQuote, MarketPairs } from "@/lib/cmc/types";
 import { checkProjectLinks, type LinkCheck } from "./links";
 import { higherPlan } from "@/lib/cmc/planLabel";
+import { saveLastVerdict } from "./boardSummaries";
 import { allFromCache, sourceNote, type StepEvent, type StepId } from "./steps";
 import { scoreReport, verdictText, type ScoreResult } from "./score";
 import {
@@ -113,6 +114,7 @@ export async function buildReport(id: number, opts: { fresh?: boolean; onStep?: 
     const cached = await kv().get<Report>(key).catch(() => null);
     if (cached) {
       for (const e of allFromCache()) emit(e);
+      void saveLastVerdict(id, verdictRecord(cached.score, cached.signals, cached.generatedAt)); // keeps the Risk board current
       return { ...cached, freshness: "cache" };
     }
   }
@@ -194,7 +196,22 @@ export async function buildReport(id: number, opts: { fresh?: boolean; onStep?: 
   };
   emit({ type: "step", id: "score", status: "done", note: `${score.scored} of ${score.total} scored` });
   await kv().set(key, report, REPORT_TTL).catch(() => undefined);
+  // the Risk board shows the latest full verdict for a week
+  await saveLastVerdict(id, verdictRecord(score, signals, report.generatedAt));
   return report;
+}
+
+/** What the Risk board keeps from a full report. */
+function verdictRecord(score: ScoreResult, signals: Signal[], at: string) {
+  return {
+    concern: score.concern,
+    scored: score.scored,
+    total: score.total,
+    drivers: signals
+      .filter((s) => s.scored && s.level !== "ok")
+      .map((s) => ({ title: s.title, level: s.level, text: s.value ? `${s.value}${s.valueLabel ? ` ${s.valueLabel}` : ""}` : s.meaning })),
+    at,
+  };
 }
 
 /** DEX security returns a one-item array. */

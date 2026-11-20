@@ -34,7 +34,16 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const enc = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (obj: unknown) => controller.enqueue(enc.encode(JSON.stringify(obj) + "\n"));
+      // if the visitor leaves mid-report the stream closes: keep building (so the report is cached), just stop sending
+      let open = true;
+      const send = (obj: unknown) => {
+        if (!open) return;
+        try {
+          controller.enqueue(enc.encode(JSON.stringify(obj) + "\n"));
+        } catch {
+          open = false;
+        }
+      };
       try {
         const report = await buildReport(id, { onStep: (e: StepEvent) => send(e) });
         send({ type: "report", report });
@@ -47,7 +56,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
           send({ type: "error", error: { kind: "internal", status: 500, message: "Something went wrong on our side." } });
         }
       } finally {
-        controller.close();
+        if (open) controller.close();
       }
     },
   });

@@ -76,7 +76,7 @@ describe("count-up numbers", () => {
 
 describe("navigation", () => {
   it("has the sidebar items in order, four of them in the phone bottom bar", () => {
-    expect(NAV.map((n) => n.label)).toEqual(["Home", "Check a coin", "Watchlist", "Alerts", "Rescue", "Ask Covex", "Connect", "API evidence"]);
+    expect(NAV.map((n) => n.label)).toEqual(["Home", "Check a coin", "Risk board", "Watchlist", "Alerts", "Rescue", "Ask Covex", "Connect", "API evidence"]);
     expect(NAV.filter((n) => n.bottom)).toHaveLength(4);
   });
   it("highlights the right item for a path", () => {
