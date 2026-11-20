@@ -12,7 +12,7 @@ import { isMeme, quickVerdict, withFullVerdict, type BoardRow, type RiskBoard } 
  * sparklines: one daily-candle call per coin, top 100 only, each cached 24 h, and only
  * while under 60% of the day's credit cap. On a Basic key, only the top 50 get sparklines.
  */
-const BOARD_KEY = "riskboard:v1";
+const BOARD_KEY = "riskboard:v2"; // v2: the warning column shows only amber/red warnings
 const BOARD_TTL = 900;
 const SPARKS_KEY = "board:sparks:v1";
 const SPARK_TTL_MS = 24 * 3600 * 1000;
@@ -21,6 +21,11 @@ const SPARK_DAYS = 8;
 interface SparkRec {
   at: string;
   closes: number[];
+}
+
+/** The cached board only (no CMC calls): lets the page render real rows on first paint. */
+export async function readCachedBoard(): Promise<RiskBoard | null> {
+  return kv().get<RiskBoard>(BOARD_KEY).catch(() => null);
 }
 
 export async function buildRiskBoard(): Promise<RiskBoard & { freshness: "live" | "cache" }> {

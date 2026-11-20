@@ -106,4 +106,18 @@ describe("risk board helpers", () => {
       ])?.title,
     ).toBe("B");
   });
+  it("never shows 'Worth watching' or 'Looks fine' as the top warning sign", () => {
+    expect(topSign([{ title: "Dilution", level: "watch", meaning: "No cap" }, { title: "Volume", level: "ok", meaning: "fine" }])).toBeNull();
+    expect(topSign([{ title: "Dilution", level: "watch", meaning: "x" }, { title: "Contract", level: "concern", meaning: "y" }])?.title).toBe("Contract");
+  });
+  it("a full report with only mild signals shows nothing in the warning column", () => {
+    const merged = withFullVerdict(row({ topSign: { title: "Dilution", text: "", level: "concern" } }), {
+      concern: "low",
+      scored: 7,
+      total: 7,
+      drivers: [{ title: "Dilution", level: "watch", text: "64%" }],
+      at: "2026-11-20T10:00:00Z",
+    });
+    expect(merged.topSign).toBeNull();
+  });
 });

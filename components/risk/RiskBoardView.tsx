@@ -36,15 +36,17 @@ const COLS =
   "md:grid-cols-[2.5rem_minmax(8rem,1fr)_6.5rem_4.5rem_9.5rem] xl:grid-cols-[2.5rem_minmax(9rem,1.2fr)_6.5rem_4.5rem_7rem_9.5rem_minmax(10rem,1fr)] min-[87.5rem]:grid-cols-[2.5rem_minmax(9rem,1.2fr)_6.5rem_4.5rem_7rem_9.5rem_minmax(10rem,1fr)_8.5rem]";
 
 /** Risk board: top coins by market cap, quick checks, sortable and filterable, with a calm 3D motion layer. */
-export function RiskBoardView() {
+export function RiskBoardView({ initial = null }: { initial?: RiskBoard | null }) {
   const full = useFullMotion();
   const router = useRouter();
-  const [load, setLoad] = useState<Load>({ s: "loading" });
+  // served from the cache on first paint when possible; otherwise skeleton rows until it loads
+  const [load, setLoad] = useState<Load>(initial ? { s: "ok", b: initial } : { s: "loading" });
   const [filter, setFilter] = useState<BoardFilter>("all");
   const [sort, setSort] = useState<{ by: BoardSort; dir: "asc" | "desc" }>({ by: "concern", dir: "desc" });
   const [opening, setOpening] = useState<number | null>(null);
 
   useEffect(() => {
+    if (initial) return; // already have the current board
     const ctrl = new AbortController();
     fetch("/api/risk-board", { signal: ctrl.signal })
       .then(async (r) => {
@@ -54,7 +56,7 @@ export function RiskBoardView() {
       })
       .catch((e: Error) => e.name !== "AbortError" && setLoad({ s: "error" }));
     return () => ctrl.abort();
-  }, []);
+  }, [initial]);
 
   const rows = useMemo(() => (load.s === "ok" ? sortRows(filterRows(load.b.rows, filter), sort.by, sort.dir) : []), [load, filter, sort]);
 
@@ -108,7 +110,7 @@ export function RiskBoardView() {
         </p>
       </motion.header>
 
-      {load.s === "loading" && <StateView kind="loading" message="Covex is reading the top coins…" />}
+      {load.s === "loading" && <SkeletonRows />}
       {load.s === "error" && <StateView kind={load.rate ? "rate-limited" : "error"} />}
 
       {load.s === "ok" && (
@@ -124,12 +126,41 @@ export function RiskBoardView() {
             <span role="columnheader" className="hidden xl:block">Top warning sign</span>
             <span role="columnheader" className="hidden min-[87.5rem]:block">Promises</span>
           </div>
-          <VirtualRows rows={rows} full={full} opening={opening} onOpen={open} />
+          <VirtualRows rows={rows} full={full} opening={opening} onOpen={open} dealFromStart={!initial} />
           {rows.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted">No coins match this filter right now.</p>}
           {load.b.sparkNote && <p className="px-4 text-xs text-faint">{load.b.sparkNote}</p>}
         </div>
       )}
       <Disclaimer />
+    </div>
+  );
+}
+
+/** Shimmering placeholder rows in the table's own layout, shown at once while the board loads. */
+function SkeletonRows() {
+  return (
+    <div role="status" aria-live="polite" aria-label="Loading the Risk board" className="space-y-2">
+      <span className="sr-only">Covex is reading the top coins…</span>
+      <div className={cn("hidden items-center gap-3 px-4 md:grid", COLS)} aria-hidden="true">
+        {["w-4", "w-10", "w-10", "w-8", "w-12", "w-16", "w-24", "w-16"].map((w, i) => (
+          <span key={i} className={cn("skeleton h-3 rounded", w, i === 4 || i === 6 ? "hidden xl:block" : "", i === 7 ? "hidden min-[87.5rem]:block" : "")} />
+        ))}
+      </div>
+      {Array.from({ length: 10 }, (_, i) => (
+        <div key={i} aria-hidden="true" className={cn("grid h-16 grid-cols-[1fr_auto] items-center gap-3 rounded-xl border border-line bg-surface-1 px-4", COLS)}>
+          <span className="skeleton hidden h-3 w-6 rounded md:block" />
+          <span className="space-y-2">
+            <span className="skeleton block h-3.5 w-32 rounded" />
+            <span className="skeleton block h-2.5 w-20 rounded md:hidden" />
+          </span>
+          <span className="skeleton hidden h-3 w-16 rounded md:block" />
+          <span className="skeleton hidden h-3 w-10 rounded md:block" />
+          <span className="skeleton hidden h-6 w-24 rounded xl:block" />
+          <span className="skeleton h-6 w-28 justify-self-end rounded-full md:justify-self-start" />
+          <span className="skeleton hidden h-3 w-36 rounded xl:block" />
+          <span className="skeleton hidden h-3 w-20 rounded min-[87.5rem]:block" />
+        </div>
+      ))}
     </div>
   );
 }
@@ -157,10 +188,23 @@ const STEP = ROW_H + 8;
 const BUFFER = 8;
 const CHUNK = 6; // move the window in steps of 6 rows: far fewer re-renders while scrolling
 
-function VirtualRows({ rows, full, opening, onOpen }: { rows: BoardRow[]; full: boolean; opening: number | null; onOpen: (r: BoardRow) => void }) {
+function VirtualRows({
+  rows,
+  full,
+  opening,
+  onOpen,
+  dealFromStart,
+}: {
+  rows: BoardRow[];
+  full: boolean;
+  opening: number | null;
+  onOpen: (r: BoardRow) => void;
+  /** false when the rows were server-rendered: they're already visible, so no deal-in */
+  dealFromStart: boolean;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const [range, setRange] = useState({ start: 0, end: 18 });
-  const [dealt, setDealt] = useState(false);
+  const [dealt, setDealt] = useState(!dealFromStart);
 
   useEffect(() => {
     let raf = 0;

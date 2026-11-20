@@ -75,9 +75,15 @@ export function quickVerdict(c: CoinQuote, btc: CoinQuote | null, now = new Date
   return { verdict: { concern: s.concern, scored: s.scored, total: 3, kind: "quick" }, topSign: topSign(signals) };
 }
 
-/** The most serious warning sign (watch or worse), or null when nothing stands out. */
+/**
+ * The most serious real warning: only "Warning sign" (amber, concern) or "Serious warning" (red,
+ * danger). "Worth watching" and "Looks fine" never appear here; with none, the board says
+ * "Nothing stands out".
+ */
+export const isWarning = (level: string) => level === "concern" || level === "danger";
+
 export function topSign(signals: Pick<Signal, "title" | "level" | "value" | "valueLabel" | "meaning">[]): BoardSign | null {
-  const worst = [...signals].filter((s) => (LEVEL_RANK[s.level] ?? -1) >= 2).sort((a, b) => (LEVEL_RANK[b.level] ?? 0) - (LEVEL_RANK[a.level] ?? 0))[0];
+  const worst = [...signals].filter((s) => isWarning(s.level)).sort((a, b) => (LEVEL_RANK[b.level] ?? 0) - (LEVEL_RANK[a.level] ?? 0))[0];
   if (!worst) return null;
   const text = worst.value ? `${worst.value}${worst.valueLabel ? ` ${worst.valueLabel}` : ""}` : worst.meaning;
   return { title: worst.title, text: text.length > 60 ? `${text.slice(0, 57)}…` : text, level: worst.level };
@@ -121,10 +127,11 @@ export function sortRows(rows: BoardRow[], by: BoardSort = "concern", dir: "asc"
 /** Merge a recent full report into a row (it outranks the quick check). */
 export function withFullVerdict(row: BoardRow, last: LastVerdict | undefined): BoardRow {
   if (!last) return row;
-  const d = [...last.drivers].sort((a, b) => (LEVEL_RANK[b.level] ?? 0) - (LEVEL_RANK[a.level] ?? 0))[0];
+  const d = last.drivers.filter((x) => isWarning(x.level)).sort((a, b) => (LEVEL_RANK[b.level] ?? 0) - (LEVEL_RANK[a.level] ?? 0))[0];
   return {
     ...row,
     verdict: { concern: last.concern, scored: last.scored, total: last.total, kind: "full", at: last.at },
-    topSign: d ? { title: d.title, text: d.text.length > 60 ? `${d.text.slice(0, 57)}…` : d.text, level: d.level } : row.topSign,
+    // the full report is the better source: if it has no real warning, nothing stands out
+    topSign: d ? { title: d.title, text: d.text.length > 60 ? `${d.text.slice(0, 57)}…` : d.text, level: d.level } : null,
   };
 }
